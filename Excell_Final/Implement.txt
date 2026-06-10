@@ -1,0 +1,93 @@
+
+Full-Stack Excel Editor & Card Viewer
+We will build a full-stack web application consisting of:
+
+Backend (Node.js/Express): A lightweight API server that manages the data in a SQL database and handles queries to the Yahoo Finance API.
+Database (Prisma ORM + SQL):
+Local Development: SQLite (file-based SQL, zero-install, extremely fast).
+Production Deployment: PostgreSQL hosted on Supabase or Neon (both offer excellent free tiers).
+Prisma ORM: Enables seamless transition between SQLite and PostgreSQL just by updating the database URL in the environment variables.
+Frontend (React):
+Admin Dashboard: Uploads Excel files, displays them in an editable grid, and saves the data as JSON to the database.
+User View: Fetches the active data from the backend and displays each row as a premium visual card.
+User Review Required
+IMPORTANT
+
+Yahoo Finance API Integration: Running this on the Node.js backend prevents CORS browser blocks and secures any API configurations. We'll outline an endpoint like /api/finance/:ticker to pull market details.
+Zero-Config Database for Dev: Using Prisma with SQLite allows you to run SQL migrations and test schema queries locally with zero server installations. When pushing to production, you'll simply plug in a free PostgreSQL database URL from Neon or Supabase.
+Proposed Folder Structure
+We propose creating a new folder Excell_Final with the following layout:
+
+text
+
+Excell_Final/
+├── backend/
+│   ├── package.json
+│   ├── server.js               # Express server with routes for DB and Yahoo Finance
+│   ├── prisma/
+│   │   ├── schema.prisma       # Prisma Database Schema (SQLite / Postgres)
+│   │   └── dev.db              # SQLite development database (automatically created)
+│   └── .env                    # Environment variables (DATABASE_URL, PORT)
+├── frontend/
+│   ├── package.json
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── src/
+│   │   ├── main.jsx
+│   │   ├── App.jsx
+│   │   ├── index.css           # Core design system (colors, typography, transitions)
+│   │   ├── components/
+│   │   │   ├── AdminDashboard.jsx # Excel upload + Editable Table
+│   │   │   ├── UserView.jsx       # Card listing page
+│   │   │   └── Card.jsx           # Individual item card component
+│   │   └── utils/
+│   │       └── excelParser.js  # Excel file reading & JSON conversion utilities
+Proposed Changes
+[NEW] 
+Excell_Final/backend/prisma/schema.prisma
+The Prisma database schema:
+
+prisma
+
+datasource db {
+  provider = "sqlite" // changed to "postgresql" in production
+  url      = env("DATABASE_URL")
+}
+generator client {
+  provider = "prisma-client-js"
+}
+model ExcelRow {
+  id        Int      @id @default(autoincrement())
+  rowId     String   @unique // unique identifier for the row
+  data      String   // JSON stringified row object
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+[NEW] 
+Excell_Final/backend/server.js
+An Express application with the following endpoints:
+
+GET /api/rows: Fetch all rows from the database.
+POST /api/rows: Overwrite/upsert the rows in the database.
+GET /api/finance/:ticker: Fetch stock/market details from the Yahoo Finance API using yahoo-finance2 package.
+[NEW] 
+Excell_Final/frontend/src/utils/excelParser.js
+Functions to parse the uploaded file buffer into worksheets and convert them to clean arrays of key-value objects.
+
+[NEW] 
+Excell_Final/frontend/src/components/AdminDashboard.jsx
+Editable sheet grid with columns mapping, local sheet state management, and a "Save to DB" action to persist edits.
+
+[NEW] 
+Excell_Final/frontend/src/components/UserView.jsx
+Fetches row data from the database and renders a responsive grid of Card components, showcasing additional real-time market data fetched via the Yahoo Finance API backend proxy.
+
+Verification Plan
+Automated / Build Tests
+Validate compilation of Vite React application.
+Verify Prisma Client generation and SQLite migration capability (npx prisma migrate dev).
+Manual Verification
+Upload an excel file.
+Edit rows in the admin grid and save.
+Check the dev.db database using Prisma Studio (npx prisma studio) to confirm rows are persisted.
+Verify cards show up correctly in User View with Yahoo Finance details.
