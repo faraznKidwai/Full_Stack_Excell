@@ -16,9 +16,7 @@ const StockCard = ({ company }) => {
           >
             {isHalal ? 'Halal' : 'Non-Halal'}
           </span>
-          <div className="stock-card__trend-icon">
-            <TrendingUp size={20} />
-          </div>
+      
         </div>
         <p className="stock-card__company">{company.companyName || '—'}</p>
       </div>
@@ -36,16 +34,7 @@ const StockCard = ({ company }) => {
         </div>
       </div>
 
-      <div className="stock-card__footer">
-        <div className="stock-card__metric">
-          <span className="stock-card__metric-label">MARKET CAP</span>
-          <span className="stock-card__metric-value">—</span>
-        </div>
-        <div className="stock-card__metric">
-          <span className="stock-card__metric-label">CURRENT PRICE</span>
-          <span className="stock-card__metric-value">—</span>
-        </div>
-      </div>
+
     </div>
   );
 };
