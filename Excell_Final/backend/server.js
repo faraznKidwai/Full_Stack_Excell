@@ -3,6 +3,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import yahooFinance from 'yahoo-finance2';
+import bcrypt from "bcrypt";
+import session from "express-session";
 
 dotenv.config();
 
@@ -10,19 +12,55 @@ const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
-// Enable CORS for frontend requests
+const ADMIN_USERNAME = "Admin";
+
+const ADMIN_PASSWORD_HASH =
+  "$2b$10$0gRpJQow6s3WlGlHPUWWfO4Z1UIYBAyiSPoYY9d7tb9ojAdg/KeZy";
+
+/* =========================
+   MIDDLEWARE
+========================= */
+
 app.use(cors({
   origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
   credentials: true
 }));
 
-// Increase payload size limits to handle large datasets
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "admin-secret",
+    resave: false,
+    saveUninitialized: false,
+    name: "admin_sid", // Explicitly name your session cookie
+    cookie: {
+      httpOnly: true,
+      secure: false, // Keep false for local localhost testing
+      sameSite: "lax", // Crucial: Allows cookie transmission across localhost ports
+      maxAge: 24 * 60 * 60 * 1000
+    }
+  })
+);
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-/**
- * Normalizes input row data to match the database schema.
- * Handles variations in case and spacing in keys.
- */
+
+/* =========================
+   AUTH MIDDLEWARE
+========================= */
+
+const requireAdmin = (req, res, next) => {
+  if (!req.session?.isAdmin) {
+    return res.status(401).json({
+      error: "Unauthorized"
+    });
+  }
+  next();
+};
+
+/* =========================
+   HELPERS
+========================= */
+
 const normalizeRows = (rows) => {
   if (!Array.isArray(rows)) return [];
 
@@ -38,19 +76,25 @@ const normalizeRows = (rows) => {
 
       for (const [key, val] of Object.entries(row)) {
         if (val === undefined || val === null) continue;
-        
+
         const cleanKey = key.toLowerCase().replace(/[^a-z0-9]/g, '');
 
         if (cleanKey === 'ticker' || cleanKey === 'symbol') {
           normalizedRow.ticker = String(val).trim().toUpperCase();
-        } else if (cleanKey === 'companyname' || cleanKey === 'company' || cleanKey === 'name' ||  cleanKey === 'stockname') {
+        } else if (
+          cleanKey === 'companyname' ||
+          cleanKey === 'company' ||
+          cleanKey === 'name' ||
+          cleanKey === 'stockname'
+        ) {
           normalizedRow.companyName = String(val).trim();
         } else if (cleanKey === 'status' || cleanKey === 'active') {
           if (typeof val === 'boolean') {
             normalizedRow.status = val;
           } else {
             const s = String(val).toLowerCase().trim();
-            normalizedRow.status = (s === 'true' || s === 'halal' || s === 'active' || s === 'yes' || s === 'y');
+            normalizedRow.status =
+              (s === 'true' || s === 'halal' || s === 'active' || s === 'yes' || s === 'y');
           }
         } else if (cleanKey === 'sector') {
           normalizedRow.sector = String(val).trim();
@@ -63,8 +107,8 @@ const normalizeRows = (rows) => {
     })
     .filter(row => row.ticker && row.ticker.length > 0);
 
-  // Remove duplicate tickers in the payload, keeping the last seen
   const uniqueRowsMap = new Map();
+
   for (const row of normalized) {
     uniqueRowsMap.set(row.ticker, row);
   }
@@ -72,7 +116,85 @@ const normalizeRows = (rows) => {
   return Array.from(uniqueRowsMap.values());
 };
 
-// API: Get all companies
+/* =========================
+   AUTH ROUTES
+========================= */
+
+app.post("/api/admin/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (username !== ADMIN_USERNAME) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid credentials"
+      });
+    }
+
+    const validPassword = await bcrypt.compare(
+      password,
+      ADMIN_PASSWORD_HASH
+    );
+
+    if (!validPassword) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid credentials"
+      });
+    }
+
+    req.session.isAdmin = true;
+
+    return res.json({
+      success: true,
+      message: "Logged in"
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      error: "Login failed"
+    });
+  }
+});
+
+app.get("/api/admin/check", (req, res) => {
+  return res.json({
+    authenticated: req.session?.isAdmin === true
+  });
+});
+
+app.post("/api/admin/logout", (req, res) => {
+ try {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({
+          success: false,
+          error: "Logout failed"
+        });
+      }
+
+      res.clearCookie("connect.sid"); // default session cookie name
+
+      return res.json({
+        success: true,
+        message: "Logged out successfully"
+      });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      error: "Logout failed"
+    });
+  }
+});
+
+/* =========================
+   DATA ROUTES
+========================= */
+
 app.get('/api/rows', async (req, res) => {
   try {
     const companies = await prisma.company.findMany({
@@ -85,22 +207,21 @@ app.get('/api/rows', async (req, res) => {
   }
 });
 
-// API: Overwrite / upsert all companies
-app.post('/api/rows', async (req, res) => {
+app.post('/api/rows', requireAdmin, async (req, res) => {
   try {
     const payload = req.body;
+
     if (!Array.isArray(payload)) {
-      return res.status(400).json({ error: 'Payload must be an array of objects' });
+      return res.status(400).json({
+        error: 'Payload must be an array of objects'
+      });
     }
 
     const normalizedData = normalizeRows(payload);
 
-    // Perform an overwrite transaction: clear table and insert normalized data
     await prisma.$transaction(async (tx) => {
-      // 1. Delete all existing records
       await tx.company.deleteMany({});
-      
-      // 2. Insert new records if there are any
+
       if (normalizedData.length > 0) {
         await tx.company.createMany({
           data: normalizedData
@@ -113,17 +234,27 @@ app.post('/api/rows', async (req, res) => {
       message: `Successfully saved ${normalizedData.length} records to the database.`,
       count: normalizedData.length
     });
+
   } catch (error) {
     console.error('Error saving rows:', error);
-    res.status(500).json({ error: 'Failed to save data to database', details: error.message });
+    res.status(500).json({
+      error: 'Failed to save data to database',
+      details: error.message
+    });
   }
 });
 
-// API: Get aggregate stats for hero cards
+/* =========================
+   STATS
+========================= */
+
 app.get('/api/stats', async (req, res) => {
   try {
     const totalStocks = await prisma.company.count();
-    const halalStocks = await prisma.company.count({ where: { status: true } });
+    const halalStocks = await prisma.company.count({
+      where: { status: true }
+    });
+
     const sectorRows = await prisma.company.findMany({
       select: { sector: true },
       distinct: ['sector'],
@@ -135,21 +266,29 @@ app.get('/api/stats', async (req, res) => {
       halalStocks,
       sectorsCount: sectorRows.length,
     });
+
   } catch (error) {
     console.error('Error fetching stats:', error);
-    res.status(500).json({ error: 'Failed to fetch statistics' });
+    res.status(500).json({
+      error: 'Failed to fetch statistics'
+    });
   }
 });
 
-// API: Yahoo Finance Proxy
+/* =========================
+   FINANCE API
+========================= */
+
 app.get('/api/finance/:ticker', async (req, res) => {
   const ticker = req.params.ticker.toUpperCase().trim();
-  
+
   try {
     const quote = await yahooFinance.quote(ticker);
-    
+
     if (!quote) {
-      return res.status(404).json({ error: `No market details found for ticker: ${ticker}` });
+      return res.status(404).json({
+        error: `No market details found for ticker: ${ticker}`
+      });
     }
 
     res.json({
@@ -166,8 +305,13 @@ app.get('/api/finance/:ticker', async (req, res) => {
       open: quote.regularMarketOpen ?? null,
       prevClose: quote.regularMarketPreviousClose ?? null,
     });
+
   } catch (error) {
-    console.warn(`Yahoo Finance API call failed for ticker: ${ticker}. Details:`, error.message);
+    console.warn(
+      `Yahoo Finance API call failed for ticker: ${ticker}.`,
+      error.message
+    );
+
     res.status(404).json({
       error: 'Failed to fetch finance details from Yahoo Finance',
       message: error.message,
@@ -176,6 +320,10 @@ app.get('/api/finance/:ticker', async (req, res) => {
   }
 });
 
+/* =========================
+   HEALTH CHECK
+========================= */
+
 app.get('/', (req, res) => {
   res.json({
     status: 'OK',
@@ -183,7 +331,9 @@ app.get('/', (req, res) => {
   });
 });
 
-// Start Server
+/* =========================
+   START SERVER
+========================= */
 app.listen(PORT, () => {
   console.log(`Backend server is running on http://localhost:${PORT}`);
 });

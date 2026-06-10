@@ -1,16 +1,19 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import '.././App.css';
 import {
   Upload,
   FileSpreadsheet,
-  CheckCircle2,
   Plus,
-  Trash2,
-  Save,
   RotateCcw,
   TableProperties,
   X,
-  Info,
-  AlertTriangle,
+  Search,
+  Save,
+  Tag,
+  LogOut,
+  User,
+  Database
 } from 'lucide-react';
 import { readFile, parseWorkbook, formatFileSize, generateObjects } from '../utils/excelParser';
 
@@ -23,29 +26,42 @@ const AdminDashboard = () => {
   const [toast, setToast] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const fileInputRef = useRef(null);
+  
+  // Selection states (triggered on single-click)
+  const [selectedRowIndex, setSelectedRowIndex] = useState(null);
+  const [selectedColIndex, setSelectedColIndex] = useState(null);
+  
+  // Inline editing control state (triggered on double-click)
+  const [editingCell, setEditingCell] = useState({ rowIndex: null, colIndex: null });
 
-  // Get current sheet data
+  const [searchTerm, setSearchTerm] = useState('');
+  const fileInputRef = useRef(null);
+  const navigate = useNavigate();
+
   const currentSheetName = sheetNames[activeSheet];
   const currentData = workbookData ? workbookData[currentSheetName] : null;
 
-  // Show toast notification
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   }, []);
 
-  // Load initial data from database on mount
+  // Fetch initial data safely on mount
   useEffect(() => {
     const fetchExistingData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('http://localhost:5000/api/rows');
+        const response = await fetch('http://localhost:5000/api/rows', {
+          method: 'GET',
+          credentials: 'include',
+        });
+
         if (!response.ok) throw new Error('Failed to load data from server');
+
         const data = await response.json();
-        
+        const headers = ['Ticker', 'Company Name', 'Status', 'Sector', 'Industry'];
+
         if (data && data.length > 0) {
-          const headers = ['Ticker', 'Company Name', 'Status', 'Sector', 'Industry'];
           const rows = data.map(item => [
             item.ticker || '',
             item.companyName || '',
@@ -53,73 +69,64 @@ const AdminDashboard = () => {
             item.sector || '',
             item.industry || ''
           ]);
-          
+
           setWorkbookData({ 'Database Storage': [headers, ...rows] });
-          setSheetNames(['Database Storage']);
-          setActiveSheet(0);
           setFileInfo({
             name: 'Database Storage',
             size: 'SQL DB',
             sheets: 1,
             rows: data.length
           });
-          showToast(`Loaded ${data.length} records from database`, 'success');
+          showToast(`Loaded ${data.length} records`, 'success');
+        } else {
+          setWorkbookData({ 'Database Storage': [headers, ['', '', 'true', '', '']] });
+          setFileInfo({
+            name: 'Database Storage Workspace',
+            size: '0 KB',
+            sheets: 1,
+            rows: 0
+          });
         }
+
+        setSheetNames(['Database Storage']);
+        setActiveSheet(0);
+
       } catch (err) {
-        console.error('Error fetching database rows:', err);
+        console.error(err);
+        showToast('Failed to load initial data', 'error');
       } finally {
         setIsLoading(false);
       }
     };
-    fetchExistingData();
-  }, [showToast]);
 
-  // Handle file processing
-  const processFile = useCallback(async (file) => {
+    fetchExistingData();
+  }, []); 
+
+  const processFile = useCallback((file) => {
     try {
-      const workbook = await readFile(file);
-      const parsed = parseWorkbook(workbook);
-      setWorkbookData(parsed.sheets);
-      setSheetNames(parsed.sheetNames);
-      setActiveSheet(0);
-      setFileInfo({
-        name: file.name,
-        size: formatFileSize(file.size),
-        sheets: parsed.sheetNames.length,
-        rows: parsed.sheets[parsed.sheetNames[0]]?.length - 1 || 0,
+      readFile(file).then((workbook) => {
+        const parsed = parseWorkbook(workbook);
+        setWorkbookData(parsed.sheets);
+        setSheetNames(parsed.sheetNames);
+        setActiveSheet(0);
+        setFileInfo({
+          name: file.name,
+          size: formatFileSize(file.size),
+          sheets: parsed.sheetNames.length,
+          rows: parsed.sheets[parsed.sheetNames[0]]?.length - 1 || 0,
+        });
+        showToast(`"${file.name}" loaded successfully`);
       });
-      showToast(`"${file.name}" loaded successfully with ${parsed.sheetNames.length} sheet(s)`);
     } catch (error) {
-      showToast('Failed to parse file. Please check the format.', 'error');
-      console.error(error);
+      showToast('Failed to parse file.', 'error');
     }
   }, [showToast]);
 
-  // File input change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) processFile(file);
   };
 
-  // Drag and drop handlers
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setDragOver(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file) processFile(file);
-  };
-
-  // Cell edit handler
   const handleCellEdit = (rowIndex, colIndex, newValue) => {
     setWorkbookData((prev) => {
       const updated = { ...prev };
@@ -128,24 +135,46 @@ const AdminDashboard = () => {
       updated[currentSheetName] = sheetCopy;
       return updated;
     });
+    setEditingCell({ rowIndex: null, colIndex: null }); // close edit engine state
   };
 
-  // Add a new row
+  const toggleStatus = (rowIndex, colIndex, currentVal) => {
+    const lowerVal = String(currentVal).toLowerCase().trim();
+    const newVal = (lowerVal === 'true' || lowerVal === 'halal') ? 'false' : 'true';
+    handleCellEdit(rowIndex, colIndex, newVal);
+  };
+
   const handleAddRow = () => {
+    if (selectedRowIndex === null) return;
     setWorkbookData((prev) => {
       const updated = { ...prev };
-      const sheet = updated[currentSheetName];
-      const colCount = sheet[0]?.length || 1;
+      const sheet = [...updated[currentSheetName]];
+      const colCount = sheet[0]?.length || 5;
       const newRow = Array(colCount).fill('');
-      updated[currentSheetName] = [...sheet, newRow];
+      sheet.splice(selectedRowIndex + 1, 0, newRow);
+      updated[currentSheetName] = sheet;
       return updated;
     });
-    showToast('New row added');
+    showToast('Row inserted below selection');
   };
 
-  // Delete a row
+  const handleAddColumn = () => {
+    if (selectedColIndex === null) return;
+    setWorkbookData((prev) => {
+      const updated = { ...prev };
+      const sheet = updated[currentSheetName].map((row, i) => {
+        const rowCopy = [...row];
+        rowCopy.splice(selectedColIndex + 1, 0, i === 0 ? 'New Column' : '');
+        return rowCopy;
+      });
+      updated[currentSheetName] = sheet;
+      return updated;
+    });
+    showToast('Column inserted next to selection');
+  };
+
   const handleDeleteRow = (rowIndex) => {
-    if (rowIndex === 0) return; // Cannot delete headers
+    if (rowIndex === 0) return;
     setWorkbookData((prev) => {
       const updated = { ...prev };
       const sheetCopy = [...updated[currentSheetName]];
@@ -153,254 +182,324 @@ const AdminDashboard = () => {
       updated[currentSheetName] = sheetCopy;
       return updated;
     });
+    setSelectedRowIndex(null);
     showToast('Row deleted');
   };
 
-  // Add a new column
-  const handleAddColumn = () => {
-    setWorkbookData((prev) => {
-      const updated = { ...prev };
-      const sheet = updated[currentSheetName].map((row, i) => [
-        ...row,
-        i === 0 ? 'New Column' : '',
-      ]);
-      updated[currentSheetName] = sheet;
-      return updated;
-    });
-    showToast('New column added');
-  };
-
-  // Reset: clear all data
   const handleReset = () => {
     setWorkbookData(null);
     setSheetNames([]);
     setActiveSheet(0);
     setFileInfo(null);
+    setSelectedRowIndex(null);
+    setSelectedColIndex(null);
+    setEditingCell({ rowIndex: null, colIndex: null });
+    setSearchTerm('');
     if (fileInputRef.current) fileInputRef.current.value = '';
     showToast('Dashboard reset');
   };
 
-  // Save (generate JSON and post to backend)
   const handleSave = async () => {
     if (!currentData || isSaving) return;
     setIsSaving(true);
-    showToast('Saving to database...', 'info');
-    
     try {
       const jsonData = generateObjects(currentData);
-      
       const response = await fetch('http://localhost:5000/api/rows', {
         method: 'POST',
+        credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(jsonData),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save data to database.');
-      }
-
       const resData = await response.json();
-      showToast(resData.message || `Saved ${resData.count} records successfully!`, 'success');
-      
-      // Update fileInfo stats to match saved row count
-      setFileInfo(prev => prev ? {
-        ...prev,
-        rows: resData.count
-      } : null);
+      if (!response.ok) {
+        throw new Error(resData.error || 'Failed to save data.');
+      }
+      showToast(resData.message || 'Saved successfully!', 'success');
     } catch (error) {
-      console.error('Save error:', error);
-      showToast(error.message || 'Error saving data to database.', 'error');
+      showToast(error.message || 'Error saving data.', 'error');
     } finally {
       setIsSaving(false);
     }
-    console.log(
-  "Payload size (bytes):",
-  new Blob([JSON.stringify(jsonData)]).size
-);
   };
 
-  // Switch sheet tab
-  const handleSheetChange = (index) => {
-    setActiveSheet(index);
+  const handleLogout = async () => {
+    try {
+      await fetch("http://localhost:5000/api/admin/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      showToast("Logged out successfully", "success");
+      setTimeout(() => {
+        navigate("/admin-login");
+      }, 500);
+    } catch (err) {
+      showToast("Logout failed", "error");
+    }
   };
 
-  // ========== RENDER ==========
+  const getFilteredRows = () => {
+    if (!currentData) return [];
+    const rows = currentData.slice(1);
+    if (!searchTerm.trim()) return rows.map((r, idx) => ({ originalIndex: idx + 1, data: r }));
+
+    return rows
+      .map((r, idx) => ({ originalIndex: idx + 1, data: r }))
+      .filter(rowObj => 
+        rowObj.data.some(cell => 
+          String(cell).toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+  };
+
+  const filteredRowObjects = getFilteredRows();
 
   return (
-    <div className="app-container">
-      {/* Header */}
-      <header className="app-header fade-in">
-        <div className="app-header__badge">
-          <TableProperties size={14} />
-          Admin Dashboard
+    <div className="dashboard-layout">
+      
+      {/* 1. LEFT ADMIN INFO PANEL / SIDEBAR */}
+      <aside className="sidebar-panel">
+        <div className="sidebar-header">
+          <Database className="sidebar-logo-icon" size={22} />
+          <h2 className="sidebar-brand-title">Screener Manager</h2>
         </div>
-        <h1 className="app-header__title">Excel Data Manager</h1>
-        <p className="app-header__subtitle">
-          Upload, edit, and manage your spreadsheet data with ease
-        </p>
-      </header>
 
-      {/* Upload Section */}
-      {!workbookData && (
-        <div className="glass-card fade-in" style={{ animationDelay: '0.1s' }}>
-          <div
-            id="upload-zone"
-            className={`upload-zone ${dragOver ? 'drag-over' : ''}`}
-            onClick={() => fileInputRef.current?.click()}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <Upload className="upload-zone__icon" size={64} strokeWidth={1.5} />
-            <p className="upload-zone__title">
-              Drop your Excel file here, or{' '}
-              <span className="upload-zone__highlight">click to browse</span>
-            </p>
-            <p className="upload-zone__subtitle">
-              Supports .xlsx, .xls, .csv, .ods and more
-            </p>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".xlsx,.xls,.csv,.ods,.xlsb,.xlsm,.txt"
-              onChange={handleFileChange}
-            />
+        {/* User Info Card Profile Placeholder */}
+        <div className="admin-profile-card">
+          <div className="avatar-placeholder">
+            <User size={24} className="avatar-icon" />
+            {/* Custom image option: <img src="your-image-url.jpg" alt="Admin" /> */}
           </div>
+          <div className="profile-details">
+            <div className="profile-name">Saif Ahmad</div>
+            <div className="profile-role">Cheif Researcher</div>
+          </div>
+                  
         </div>
-      )}
 
-      {/* File Info + Table Section */}
-      {workbookData && currentData && (
-        <div className="glass-card fade-in">
-          {/* File Info Bar */}
-          {fileInfo && (
-            <div className="file-info">
-              <div className="file-info__left">
-                <div className="file-info__icon">
-                  <FileSpreadsheet size={18} />
-                </div>
-                <div>
-                  <div className="file-info__name">{fileInfo.name}</div>
-                  <div className="file-info__meta">
-                    {fileInfo.size} • {fileInfo.sheets} sheet(s) • {currentData.length - 1} rows
-                  </div>
-                </div>
-              </div>
-              <div className="status-badge status-badge--success">
-                <CheckCircle2 size={12} />
-                Loaded
-              </div>
+        <nav className="sidebar-nav">
+          <div className="nav-item active">
+            <TableProperties size={16} />
+            <span>Database View</span>
+          </div>
+                    <div className="nav-item active">
+
+            <button className="sidebar-logout-btn" onClick={handleLogout}>
+          <LogOut size={16} />
+          <span>Logout </span>
+        </button>
+          </div>
+        </nav>
+
+        {/* Moved Logout Button Down Here */}
+
+      </aside>
+
+      {/* 2. MAIN WORKSPACE CONTENT */}
+      <main className="main-content-area">
+        <header className="workspace-header">
+          <h1 className="main-app-title">Zam Zam Screener Data Manager</h1>
+          <p className="main-app-subtitle">Perform structural table data reads, column expansions, and database modifications using an excell upload or database table</p>
+        </header>
+
+        {/* Upload Zone */}
+        {!workbookData && (
+          <div className="glass-card fade-in">
+            <div
+              className="upload-zone"
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={(e) => { e.preventDefault(); setDragOver(false); }}
+              onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files[0]; if (f) processFile(f); }}
+            >
+              <Upload className="upload-zone__icon" size={44} />
+              <p className="upload-zone__title">Drop your spreadsheet data file here, or <span className="upload-zone__highlight">browse</span></p>
+              <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" onChange={handleFileChange} />
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Sheet Tabs */}
-          {sheetNames.length > 1 && (
-            <div className="sheet-tabs" id="sheet-tabs">
-              {sheetNames.map((name, idx) => (
-                <button
-                  key={idx}
-                  className={`sheet-tab ${idx === activeSheet ? 'active' : ''}`}
-                  onClick={() => handleSheetChange(idx)}
-                >
-                  {name}
-                </button>
-              ))}
-            </div>
-          )}
+        {/* Main Table Interface Grid */}
+        {workbookData && currentData && (
+          <div className="glass-card fade-in table-card-margin">
+            {fileInfo && (
+              <div className="file-info-bar">
+                <FileSpreadsheet size={16} className="file-icon-accent" />
+                <span className="file-info-text">
+                  No. of Records: <strong>{fileInfo.name}</strong> — {currentData.length - 1} 
+                </span>
+              </div>
+            )}
 
-          {/* Data Table */}
-          <div className="table-container" id="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th className="row-number">#</th>
-                  {currentData[0]?.map((header, colIdx) => (
-                    <th
-                      key={colIdx}
-                      contentEditable
-                      suppressContentEditableWarning
-                      onBlur={(e) =>
-                        handleCellEdit(0, colIdx, e.currentTarget.textContent)
-                      }
-                    >
-                      {header}
-                    </th>
-                  ))}
-                  <th className="row-actions"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentData.slice(1).map((row, rowIdx) => (
-                  <tr key={rowIdx}>
-                    <td className="row-number">{rowIdx + 1}</td>
-                    {row.map((cell, colIdx) => (
-                      <td
+            <div className="table-container-scroller">
+              <table className="data-table">
+                <thead>
+                  <tr className="main-header-row">
+                    <th className="row-number-header">ID</th>
+                    {currentData[0]?.map((header, colIdx) => (
+                      <th 
                         key={colIdx}
-                        contentEditable
-                        suppressContentEditableWarning
-                        onBlur={(e) =>
-                          handleCellEdit(rowIdx + 1, colIdx, e.currentTarget.textContent)
-                        }
+                        className={selectedColIndex === colIdx ? 'column-selected' : ''}
+                        onClick={() => {
+                          setSelectedColIndex(colIdx);
+                          setSelectedRowIndex(null); // highlight whole column
+                        }}
                       >
-                        {cell}
-                      </td>
+                        <div className="header-cell-content">
+                          {colIdx === 0 && <Tag size={12} className="tag-icon-decor" />}
+                          {header}
+                        </div>
+                      </th>
                     ))}
-                    <td className="row-actions">
-                      <button
-                        className="row-action-btn"
-                        title="Delete row"
-                        onClick={() => handleDeleteRow(rowIdx + 1)}
-                      >
-                        <X size={14} />
-                      </button>
-                    </td>
+                    <th className="row-actions-header">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredRowObjects.map((rowObj) => {
+                    const actualRowIdx = rowObj.originalIndex;
+                    const row = rowObj.data;
+                    const isRowSelected = selectedRowIndex === actualRowIdx;
 
-          {/* Action Bar */}
-          <div className="action-bar">
-            <div className="action-bar__left">
-              <button className="btn btn--sm" onClick={handleAddRow} id="btn-add-row">
-                <Plus size={14} />
-                Add Row
-              </button>
-              <button className="btn btn--sm" onClick={handleAddColumn} id="btn-add-col">
-                <Plus size={14} />
-                Add Column
-              </button>
-            </div>
-            <div className="action-bar__right">
-              <button className="btn btn--danger btn--sm" onClick={handleReset} id="btn-reset">
-                <RotateCcw size={14} />
-                Reset
-              </button>
-              <button 
-                className="btn btn--primary" 
-                onClick={handleSave} 
-                id="btn-save"
-                disabled={isSaving}
-              >
-                <Save size={16} className={isSaving ? "pulse" : ""} />
-                {isSaving ? 'Saving...' : 'Save Data'}
-              </button>
+                    return (
+                      <tr key={actualRowIdx} className={isRowSelected ? 'row-selected' : ''}>
+                        {/* Clear ID visibility cell */}
+                        <td className="row-number-cell">{actualRowIdx}</td>
+                        
+                        {row.map((cell, colIdx) => {
+                          const isCellEditing = editingCell.rowIndex === actualRowIdx && editingCell.colIndex === colIdx;
+                          const isCellSelected = isRowSelected && selectedColIndex === colIdx;
+                          
+                          // STATUS COLUMN: Single-click toggling exclusively
+                          if (colIdx === 2) {
+                            const isHalal = String(cell).toLowerCase().trim() === 'true' || String(cell).toLowerCase().trim() === 'halal';
+                            return (
+                              <td 
+                                key={colIdx}
+                                className={isCellSelected ? 'cell-focused' : ''}
+                                onClick={() => {
+                                  setSelectedRowIndex(actualRowIdx);
+                                  setSelectedColIndex(colIdx);
+                                }}
+                              >
+                                <div className="badge-cell-container">
+                                  <span 
+                                    className={`status-pill ${isHalal ? 'pill--halal' : 'pill--nonhalal'}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleStatus(actualRowIdx, colIdx, cell);
+                                    }}
+                                  >
+                                    {isHalal ? 'Halal' : 'Non-Halal'}
+                                  </span>
+                                </div>
+                              </td>
+                            );
+                          }
+
+                          // TEXT DATA COLUMNS: Single click selects, Double click opens input editor
+                          return (
+                            <td 
+                              key={colIdx}
+                              className={`${isCellSelected ? 'cell-focused' : ''} ${isCellEditing ? 'cell-editing-active' : ''}`}
+                              onClick={() => {
+                                setSelectedRowIndex(actualRowIdx);
+                                setSelectedColIndex(colIdx);
+                              }}
+                              onDoubleClick={() => {
+                                setEditingCell({ rowIndex: actualRowIdx, colIndex: colIdx });
+                              }}
+                            >
+                              {isCellEditing ? (
+                                <input
+                                  type="text"
+                                  defaultValue={cell}
+                                  autoFocus
+                                  className="table-cell-inline-input"
+                                  onBlur={(e) => handleCellEdit(actualRowIdx, colIdx, e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') handleCellEdit(actualRowIdx, colIdx, e.target.value);
+                                    if (e.key === 'Escape') setEditingCell({ rowIndex: null, colIndex: null });
+                                  }}
+                                />
+                              ) : (
+                                cell
+                              )}
+                            </td>
+                          );
+                        })}
+
+                        <td className="row-actions-cell">
+                          <button className="row-delete-action-btn" onClick={() => handleDeleteRow(actualRowIdx)}>
+                            <X size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Toast Notification */}
+        {/* STICKY BOTTOM ACTION BAR */}
+        {workbookData && currentData && (
+          <div className="sticky-action-bar-wrapper">
+            <div className="sticky-action-bar">
+              <div className="action-bar__search">
+                <Search size={16} className="search-bar-icon" />
+                <input 
+                  type="text" 
+                  placeholder="Filter active table view..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-bar-input"
+                />
+                {searchTerm && (
+                  <button className="search-clear-btn" onClick={() => setSearchTerm('')}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+
+              <div className="action-bar__controls">
+                <button 
+                  className="btn-action-ui btn-action-ui--secondary" 
+                  onClick={handleAddRow}
+                  disabled={selectedRowIndex === null}
+                  title={selectedRowIndex === null ? "Click any row cell to select target insertion point" : "Insert blank row directly below selection"}
+                >
+                  <Plus size={14} /> Add Row
+                </button>
+                
+                <button 
+                  className="btn-action-ui btn-action-ui--secondary" 
+                  onClick={handleAddColumn}
+                  disabled={selectedColIndex === null}
+                  title={selectedColIndex === null ? "Click header cell to select target insertion index" : "Insert column next to selection"}
+                >
+                  <Plus size={14} /> Add Column
+                </button>
+
+                <button className="btn-action-ui btn-action-ui--neutral" onClick={handleReset}>
+                  <RotateCcw size={14} /> Reset View
+                </button>
+                
+                <button className="btn-action-ui btn-action-ui--primary" onClick={handleSave} disabled={isSaving}>
+                  <Save size={16} /> {isSaving ? 'Saving Changes...' : 'Save Production Database'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Toast systems */}
       {toast && (
         <div className={`toast toast--${toast.type}`}>
-          {toast.type === 'success' && <CheckCircle2 size={18} color="var(--success)" />}
-          {toast.type === 'error' && <X size={18} color="var(--danger)" />}
-          {toast.type === 'info' && <Info size={18} color="var(--accent-primary)" />}
-          {toast.type === 'warning' && <AlertTriangle size={18} color="var(--warning)" />}
           {toast.message}
         </div>
       )}
