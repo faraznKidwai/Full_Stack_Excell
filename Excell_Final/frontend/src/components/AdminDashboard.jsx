@@ -267,37 +267,25 @@ const AdminDashboard = () => {
           <h2 className="sidebar-brand-title">Screener Manager</h2>
         </div>
 
-        {/* User Info Card Profile Placeholder */}
+        {/* User Info Card Profile */}
         <div className="admin-profile-card">
           <div className="avatar-placeholder">
             <User size={24} className="avatar-icon" />
-            {/* Custom image option: <img src="your-image-url.jpg" alt="Admin" /> */}
           </div>
           <div className="profile-details">
             <div className="profile-name">Saif Ahmad</div>
-            <div className="profile-role">Cheif Researcher</div>
+            <div className="profile-role">Chief Researcher</div>
           </div>
-                  
         </div>
 
+        {/* Navigation Framework Links */}
         <nav className="sidebar-nav">
-          <div className="nav-item active">
-            <TableProperties size={16} />
-            <span>Database View</span>
-          </div>
-                    <div className="nav-item active">
-
-            <button className="sidebar-logout-btn" onClick={handleLogout}>
-          <LogOut size={16} />
-          <span>Logout </span>
-        </button>
+          <div className="nav-item active sidebar-logout-clickable" onClick={handleLogout} style={{ cursor: 'pointer' }}>
+            <LogOut size={16} />
+            <span>Logout</span>
           </div>
         </nav>
-
-        {/* Moved Logout Button Down Here */}
-
       </aside>
-
       {/* 2. MAIN WORKSPACE CONTENT */}
       <main className="main-content-area">
         <header className="workspace-header">

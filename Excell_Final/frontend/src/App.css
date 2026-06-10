@@ -567,3 +567,163 @@ body {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+
+/* ==========================================================================
+   PRODUCTION LIGHT GREEN & EMERALD LOGIN DESIGN ARCHITECTURE
+   ========================================================================== */
+/* ==========================================================================
+   ISOLATED LIGHT GREEN & EMERALD LOGIN DESIGN ARCHITECTURE
+   ========================================================================== */
+
+/* This wrapper acts as a full-screen shield ONLY for the login route */
+.login-page-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc; /* Matches var(--bg-workspace) safely */
+  z-index: 9999; /* Forces it over everything else safely, exclusively on its route */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.login-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+  box-sizing: border-box;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.login-title {
+  margin: 0 0 6px 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #15803d; /* Safe hex fallback matching dashboard emerald */
+  letter-spacing: -0.5px;
+}
+
+.login-subtitle {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
+/* Forms & Structural Inputs */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.input-with-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-field-icon {
+  position: absolute;
+  left: 14px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.login-text-input {
+  width: 100%;
+  padding: 12px 14px 12px 40px;
+  box-sizing: border-box;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  background-color: #ffffff;
+  color: #1e293b;
+  transition: all 0.15s ease;
+}
+
+.login-text-input:focus {
+  border-color: #15803d;
+  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.1);
+}
+
+/* Call To Action Buttons */
+.login-submit-btn {
+  width: 100%;
+  background-color: #15803d;
+  color: #ffffff;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  margin-top: 8px;
+}
+
+.login-submit-btn:hover:not(:disabled) {
+  background-color: #166534;
+}
+
+.login-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-error-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  margin-bottom: 24px;
+  box-sizing: border-box;
+}
+
+.error-alert-icon {
+  color: #ef4444;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.sidebar-logout-clickable{
+    background-color: #ff0202 !important; /* Soft red alert background tint */
+  color: #ffffff !important; 
+}
+
+
+.sidebar-logout-clickable:hover {
+  background-color: #fa0303 !important; /* Soft red alert background tint */
+  color: #fca9a9 !important;            /* Crimson text color */
+}
