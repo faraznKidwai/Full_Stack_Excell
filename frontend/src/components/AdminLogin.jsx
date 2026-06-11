@@ -17,14 +17,12 @@ const AdminLogin = () => {
 
     try {
       // Changed from localhost:5000 to a clean relative path for production alignment
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Allows secure authentication cookies to toggle properly
-        body: JSON.stringify({ username, password }),
-      });
+     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/login`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  credentials: 'include',
+  body: JSON.stringify({ username, password }),
+});
 
       const data = await response.json();
 
