@@ -5,6 +5,8 @@ import { PrismaClient } from '@prisma/client';
 import yahooFinance from 'yahoo-finance2';
 import bcrypt from "bcrypt";
 import session from "express-session";
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -12,37 +14,52 @@ const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
-const ADMIN_USERNAME = "Admin";
+// Resolve directory paths for ES Modules to serve static assets
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const ADMIN_PASSWORD_HASH =
-  "$2b$10$0gRpJQow6s3WlGlHPUWWfO4Z1UIYBAyiSPoYY9d7tb9ojAdg/KeZy";
+const ADMIN_USERNAME = "Admin";
+const ADMIN_PASSWORD_HASH = "$2b$10$0gRpJQow6s3WlGlHPUWWfO4Z1UIYBAyiSPoYY9d7tb9ojAdg/KeZy";
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 /* =========================
-   MIDDLEWARE
+   MIDDLEWARE & SECURITY
 ========================= */
 
+// Dynamic CORS adjustments for development flexibility
+const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: function (origin, callback) {
+    // In production Plan C, requests are same-domain, so origin might be undefined.
+    if (!origin || allowedOrigins.indexOf(origin) !== -1 || !isProduction) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
+
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "admin-secret",
     resave: false,
     saveUninitialized: false,
-    name: "admin_sid", // Explicitly name your session cookie
+    name: "admin_sid", 
     cookie: {
       httpOnly: true,
-      secure: false, // Keep false for local localhost testing
-      sameSite: "lax", // Crucial: Allows cookie transmission across localhost ports
-      maxAge: 24 * 60 * 60 * 1000
+      // Production demands secure cookies over HTTPS, Local fallback allows plain HTTP
+      secure: isProduction, 
+      // Lax handles same-site architecture flawlessly; 'none' is requested if domains completely fork
+      sameSite: isProduction ? "none" : "lax", 
+      maxAge: 24 * 60 * 60 * 1000 // 1 Day
     }
   })
 );
-
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 /* =========================
    AUTH MIDDLEWARE
@@ -175,7 +192,8 @@ app.post("/api/admin/logout", (req, res) => {
         });
       }
 
-      res.clearCookie("connect.sid"); // default session cookie name
+      // CRITICAL FIX: Clears your explicitly named cookie "admin_sid" instead of default "connect.sid"
+      res.clearCookie("admin_sid"); 
 
       return res.json({
         success: true,
@@ -321,19 +339,26 @@ app.get('/api/finance/:ticker', async (req, res) => {
 });
 
 /* =========================
-   HEALTH CHECK
+   PLAN C: SERVE FRONTEND STATIC ASSETS
 ========================= */
 
-app.get('/', (req, res) => {
-  res.json({
-    status: 'OK',
-    message: 'Backend is running'
-  });
+// Direct Node to find and serve the production compiled assets folder
+// Adjust '../frontend/dist' to point accurately from your server.js location to the frontend compiled directory
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// SPA Wildcard Catch-all Handler
+// Ensures client-side routing links (e.g. /admin-login) do not crash upon browser reload
+app.get('*', (req, res, next) => {
+  // If the request targets a backend API endpoint that was typed improperly, skip out to avoid blank index response
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 
 /* =========================
    START SERVER
 ========================= */
 app.listen(PORT, () => {
-  console.log(`Backend server is running on http://localhost:${PORT}`);
+  console.log(`Backend server running in ${isProduction ? 'production' : 'development'} mode on port ${PORT}`);
 });
