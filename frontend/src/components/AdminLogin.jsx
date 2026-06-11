@@ -16,14 +16,15 @@ const AdminLogin = () => {
     setIsLoading(true);
 
     try {
-  const response = await fetch('http://localhost:5000/api/admin/login', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  credentials: 'include', // ⚠️ CRITICAL FIX: Allows cookies to be saved locally
-  body: JSON.stringify({ username, password }),
-});
+      // Changed from localhost:5000 to a clean relative path for production alignment
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Allows secure authentication cookies to toggle properly
+        body: JSON.stringify({ username, password }),
+      });
 
       const data = await response.json();
 
@@ -48,7 +49,6 @@ const AdminLogin = () => {
         
         {/* Branding Area */}
         <div className="login-header">
-     
           <h1 className="login-title">Zam Zam Screener Manager</h1>
           <p className="login-subtitle">Sign in to access database </p>
         </div>
@@ -104,7 +104,6 @@ const AdminLogin = () => {
           </button>
         </form>
 
-     
       </div>
     </div>
   );
