@@ -5,6 +5,8 @@ import { PrismaClient } from '@prisma/client';
 import yahooFinance from 'yahoo-finance2';
 import bcrypt from "bcrypt";
 import session from "express-session";
+import connectPg from 'connect-pg-simple';
+
 
 dotenv.config();
 
@@ -22,6 +24,23 @@ const isProduction = process.env.NODE_ENV === 'production';
 /* =========================
    MIDDLEWARE & SECURITY
 ========================= */
+
+app.use(session({
+  store: new PgSession({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: true
+  }),
+  secret: process.env.SESSION_SECRET || "admin-secret",
+  resave: false,
+  saveUninitialized: false,
+  name: "admin_sid",
+  cookie: {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 24 * 60 * 60 * 1000
+  }
+}));
 
 // Dynamic CORS adjustments for development flexibility
 const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://full-stack-excell.vercel.app/'];
