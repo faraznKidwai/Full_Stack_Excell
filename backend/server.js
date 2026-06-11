@@ -265,7 +265,7 @@ app.post('/api/rows', requireAdmin, async (req, res) => {
 /* =========================
    STATS
 ========================= */
-
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
 app.get('/api/stats', async (req, res) => {
   try {
     const totalStocks = await prisma.company.count();
