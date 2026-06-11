@@ -9,9 +9,9 @@ const ProtectedAdminRoute = ({ children }) => {
     const checkAuth = async () => {
       try {
         // Changed from local host to relative endpoint pathing for seamless production deployment
-        const res = await fetch("/api/admin/check", {
-          credentials: "include",
-        });
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/check`, {
+  credentials: 'include',
+});
 
         const data = await res.json();
         setIsAuth(data.authenticated);
