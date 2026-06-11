@@ -1,23 +1,11 @@
 {
   "version": 2,
-  "builds": [
-    { 
-      "src": "frontend/package.json", 
-      "use": "@vercel/static-build", 
-      "config": { "distDir": "dist" } 
-    },
-    { 
-      "src": "api/**/*.js", 
-      "use": "@vercel/node" 
-    }
-  ],
-  "routes": [
-    { "src": "/api/admin/login", "dest": "api/admin/login.js" },
-    { "src": "/api/admin/check", "dest": "api/admin/check.js" },
-    { "src": "/api/admin/logout", "dest": "api/admin/logout.js" },
-    { "src": "/api/rows", "dest": "api/rows.js" },
-    { "src": "/api/stats", "dest": "api/stats.js" },
-    { "src": "/assets/(.*)", "dest": "frontend/dist/assets/$1" },
-    { "src": "/(.*)", "dest": "frontend/dist/index.html" }
+  "rewrites": [
+    { "source": "/api/admin/login", "destination": "/api/admin/login.js" },
+    { "source": "/api/admin/check", "destination": "/api/admin/check.js" },
+    { "source": "/api/admin/logout", "destination": "/api/admin/logout.js" },
+    { "source": "/api/rows", "destination": "/api/rows.js" },
+    { "source": "/api/stats", "destination": "/api/stats.js" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
