@@ -5,7 +5,9 @@ import { PrismaClient } from '@prisma/client';
 import yahooFinance from 'yahoo-finance2';
 import bcrypt from "bcrypt";
 import session from "express-session";
-import connectPg from 'connect-pg-simple';
+import connectPgSimple from 'connect-pg-simple';
+
+
 
 
 dotenv.config();
@@ -13,6 +15,7 @@ dotenv.config();
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
+const PgSession = connectPgSimple(session);
 
 // Resolve directory paths for ES Modules to serve static assets
 
@@ -24,6 +27,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 /* =========================
    MIDDLEWARE & SECURITY
 ========================= */
+
 
 app.use(session({
   store: new PgSession({
@@ -41,7 +45,6 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000
   }
 }));
-
 // Dynamic CORS adjustments for development flexibility
 const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://full-stack-excell.vercel.app/'];
 app.use(cors({
