@@ -41,6 +41,15 @@ const AdminDashboard = () => {
   const currentSheetName = sheetNames[activeSheet];
   const currentData = workbookData ? workbookData[currentSheetName] : null;
 
+  // 1. DYNAMICALLY DETECT STATUS COLUMN POSITION FROM EXCEL OR DATABASE
+  const getStatusColumnIndex = () => {
+    if (!currentData || !currentData[0]) return 2; // Fallback default
+    return currentData[0].findIndex(header => 
+      String(header).toLowerCase().trim() === 'status'
+    );
+  };
+  const statusColIdx = getStatusColumnIndex();
+
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -138,9 +147,16 @@ const AdminDashboard = () => {
     setEditingCell({ rowIndex: null, colIndex: null }); // close edit engine state
   };
 
+  // 2. TOGGLE ACTION LOGIC WITH BULLETPROOF STATUS COMPARISONS
   const toggleStatus = (rowIndex, colIndex, currentVal) => {
-    const lowerVal = String(currentVal).toLowerCase().trim();
-    const newVal = (lowerVal === 'true' || lowerVal === 'halal') ? 'false' : 'true';
+    const cleanString = typeof currentVal === 'string' ? currentVal.toLowerCase().trim() : String(currentVal).toLowerCase().trim();
+    
+    // Check for positive indicators while actively omitting explicit negative prefixes
+    const isCurrentlyHalal = (cleanString === 'true' || cleanString === '1' || cleanString === 'halal') && 
+                             !cleanString.includes('non') && 
+                             !cleanString.includes('not');
+    
+    const newVal = isCurrentlyHalal ? 'false' : 'true';
     handleCellEdit(rowIndex, colIndex, newVal);
   };
 
@@ -286,11 +302,12 @@ const AdminDashboard = () => {
           </div>
         </nav>
       </aside>
+      
       {/* 2. MAIN WORKSPACE CONTENT */}
       <main className="main-content-area">
         <header className="workspace-header">
           <h1 className="main-app-title">Zam Zam Screener Data Manager</h1>
-          <p className="main-app-subtitle">Perform structural table data reads, column expansions, and database modifications using an excell upload or database table</p>
+          <p className="main-app-subtitle">Perform structural table data reads, column expansions, and database modifications using an excel upload or database table</p>
         </header>
 
         {/* Upload Zone */}
@@ -360,9 +377,16 @@ const AdminDashboard = () => {
                           const isCellEditing = editingCell.rowIndex === actualRowIdx && editingCell.colIndex === colIdx;
                           const isCellSelected = isRowSelected && selectedColIndex === colIdx;
                           
-                          // STATUS COLUMN: Single-click toggling exclusively
-                          if (colIdx === 2) {
-                            const isHalal = String(cell).toLowerCase().trim() === 'true' || String(cell).toLowerCase().trim() === 'halal';
+                          // 3. TARGET STATUS CELL VISUALIZATION (DYNAMICAL MATCHING)
+                          if (colIdx === statusColIdx && statusColIdx !== -1) {
+                            const cleanCell = cell === true || cell === false ? cell : String(cell).toLowerCase().trim();
+                            
+                            // Highly explicit validation against negative substring matches
+                            const isHalal = cleanCell === true || 
+                                            cleanCell === 'true' || 
+                                            cleanCell === '1' || 
+                                            (typeof cleanCell === 'string' && cleanCell.includes('halal') && !cleanCell.includes('non') && !cleanCell.includes('not'));
+
                             return (
                               <td 
                                 key={colIdx}
