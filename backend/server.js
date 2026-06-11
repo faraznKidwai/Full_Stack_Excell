@@ -3,19 +3,19 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import yahooFinance from 'yahoo-finance2';
-import bcrypt from "bcryptjs";
 import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
 const app = express();
+
+// Force Express to trust Vercel's routing proxy layer to allow clean HTTP-Only cookies
 app.set('trust proxy', 1);
+
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
-const ADMIN_USERNAME = "Admin";
-const ADMIN_PASSWORD_HASH = "$2b$10$0gRpJQow6s3WlGlHPUWWfO4Z1UIYBAyiSPoYY9d7tb9ojAdg/KeZy";
-
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "Admin";
 const isProduction = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
 const SESSION_SECRET = process.env.SESSION_SECRET || "admin-secret";
 
@@ -177,19 +177,14 @@ app.post("/api/admin/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    if (!username || username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()) {
-      return res.status(401).json({
-        success: false,
-        error: "Invalid credentials"
-      });
-    }
+    // Secure, case-insensitive comparison framework
+    const correctUsername = ADMIN_USERNAME.toLowerCase();
+    const inputUsername = (username || "").trim().toLowerCase();
 
-    const validPassword = await bcrypt.compare(
-      password,
-      ADMIN_PASSWORD_HASH
-    );
+    // Pull directly from Vercel's encrypted environment variable vault
+    const correctPassword = process.env.ADMIN_PASSWORD;
 
-    if (!validPassword) {
+    if (inputUsername !== correctUsername || !correctPassword || password !== correctPassword) {
       return res.status(401).json({
         success: false,
         error: "Invalid credentials"
