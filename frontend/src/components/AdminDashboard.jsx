@@ -61,10 +61,10 @@ const AdminDashboard = () => {
       setIsLoading(true);
       try {
         // Changed from local host path to a proper clean relative routing system
-        const response = await fetch('/api/rows', {
-          method: 'GET',
-          credentials: 'include',
-        });
+const response = await fetch(`${import.meta.env.VITE_API_URL}/api/rows`, {
+  method: 'GET',
+  credentials: 'include',
+});
 
         if (!response.ok) throw new Error('Failed to load data from server');
 
@@ -222,14 +222,12 @@ const AdminDashboard = () => {
     try {
       const jsonData = generateObjects(currentData);
       // Cleaned relative routing targets local proxy setups or direct production routing maps
-      const response = await fetch('/api/rows', {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(jsonData),
-      });
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/rows`, {
+  method: 'POST',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(jsonData),
+});
 
       const resData = await response.json();
       if (!response.ok) {
@@ -246,10 +244,10 @@ const AdminDashboard = () => {
   const handleLogout = async () => {
     try {
       // Adjusted from local absolute domain to clean backend proxy relative mapping
-      await fetch('/api/admin/logout', {
-        method: "POST",
-        credentials: "include",
-      });
+    await fetch(`${import.meta.env.VITE_API_URL}/api/admin/logout`, {
+  method: 'POST',
+  credentials: 'include',
+});
 
       showToast("Logged out successfully", "success");
       setTimeout(() => {
