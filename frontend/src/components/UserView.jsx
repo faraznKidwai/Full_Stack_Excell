@@ -33,10 +33,10 @@ const UserView = () => {
       setIsLoading(true);
       try {
         // Using relative URLs here maps perfectly to Vercel Serverless in production
-        const [rowsRes, statsRes] = await Promise.all([
-          fetch('/api/rows'),
-          fetch('/api/stats'),
-        ]);
+ const [rowsRes, statsRes] = await Promise.all([
+  fetch(`${import.meta.env.VITE_API_URL}/api/rows`),
+  fetch(`${import.meta.env.VITE_API_URL}/api/stats`),
+]);
 
         const rows = await rowsRes.json();
         const statsData = await statsRes.json();
