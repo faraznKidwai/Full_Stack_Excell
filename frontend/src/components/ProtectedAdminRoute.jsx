@@ -8,7 +8,8 @@ const ProtectedAdminRoute = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/admin/check", {
+        // Changed from local host to relative endpoint pathing for seamless production deployment
+        const res = await fetch("/api/admin/check", {
           credentials: "include",
         });
 
