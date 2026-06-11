@@ -5,8 +5,6 @@ import { PrismaClient } from '@prisma/client';
 import yahooFinance from 'yahoo-finance2';
 import bcrypt from "bcrypt";
 import session from "express-session";
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -15,8 +13,6 @@ const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
 // Resolve directory paths for ES Modules to serve static assets
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const ADMIN_USERNAME = "Admin";
 const ADMIN_PASSWORD_HASH = "$2b$10$0gRpJQow6s3WlGlHPUWWfO4Z1UIYBAyiSPoYY9d7tb9ojAdg/KeZy";
@@ -348,17 +344,7 @@ app.get('/api/finance/:ticker', async (req, res) => {
 
 // Direct Node to find and serve the production compiled assets folder
 // Adjust '../frontend/dist' to point accurately from your server.js location to the frontend compiled directory
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
-// SPA Wildcard Catch-all Handler
-// Ensures client-side routing links (e.g. /admin-login) do not crash upon browser reload
-app.get('*', (req, res, next) => {
-  // If the request targets a backend API endpoint that was typed improperly, skip out to avoid blank index response
-  if (req.path.startsWith('/api')) {
-    return next();
-  }
-  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
-});
 
 /* =========================
    START SERVER
