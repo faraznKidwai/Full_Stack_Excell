@@ -1,0 +1,14 @@
+{
+  "name": "zam-zam-screener-monolith",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@prisma/client": "^5.22.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
+  },
+  "scripts": {
+    "vercel-build": "prisma generate --schema=./backend/prisma/schema.prisma"
+  }
+}
