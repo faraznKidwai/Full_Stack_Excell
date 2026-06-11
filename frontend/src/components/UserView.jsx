@@ -8,13 +8,11 @@ import {
   ChevronUp,
   X,
   Loader2,
-  
 } from 'lucide-react';
 import StockCard from './StockCard';
 import logo from '../assets/ZamZamWater_logo.jpg';
 
 const CARDS_PER_PAGE = 12;
-const API_BASE = 'http://localhost:5000';
 
 const UserView = () => {
   const [companies, setCompanies] = useState([]);
@@ -34,9 +32,10 @@ const UserView = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
+        // Using relative URLs here maps perfectly to Vercel Serverless in production
         const [rowsRes, statsRes] = await Promise.all([
-          fetch(`${API_BASE}/api/rows`),
-          fetch(`${API_BASE}/api/stats`),
+          fetch('/api/rows'),
+          fetch('/api/stats'),
         ]);
 
         const rows = await rowsRes.json();
@@ -139,7 +138,7 @@ const UserView = () => {
         </div>
       </nav>
 
-      {/* ===== WHITE CLEAN HERO CONTAINER (IMAGE 1) ===== */}
+      {/* ===== WHITE CLEAN HERO CONTAINER ===== */}
       <div style={{ padding: '40px 20px', maxWidth: '1200px', margin: '40px auto 20px auto' }}>
         <div style={{
           backgroundColor: '#ffffff',
