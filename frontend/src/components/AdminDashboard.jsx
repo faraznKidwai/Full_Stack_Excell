@@ -60,7 +60,8 @@ const AdminDashboard = () => {
     const fetchExistingData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('http://localhost:5000/api/rows', {
+        // Changed from local host path to a proper clean relative routing system
+        const response = await fetch('/api/rows', {
           method: 'GET',
           credentials: 'include',
         });
@@ -220,7 +221,8 @@ const AdminDashboard = () => {
     setIsSaving(true);
     try {
       const jsonData = generateObjects(currentData);
-      const response = await fetch('http://localhost:5000/api/rows', {
+      // Cleaned relative routing targets local proxy setups or direct production routing maps
+      const response = await fetch('/api/rows', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -243,7 +245,8 @@ const AdminDashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:5000/api/admin/logout", {
+      // Adjusted from local absolute domain to clean backend proxy relative mapping
+      await fetch('/api/admin/logout', {
         method: "POST",
         credentials: "include",
       });
