@@ -31,15 +31,19 @@ const isProduction = process.env.NODE_ENV === 'production';
 const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://full-stack-excell.vercel.app/'];
 app.use(cors({
   origin: function (origin, callback) {
-    // In production Plan C, requests are same-domain, so origin might be undefined.
-    if (!origin || allowedOrigins.indexOf(origin) !== -1 || !isProduction) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Explicitly handle preflight for all routes
+app.options('*', cors());
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
