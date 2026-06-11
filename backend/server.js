@@ -9,6 +9,7 @@ import jwt from 'jsonwebtoken';
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', 1);
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
@@ -176,7 +177,7 @@ app.post("/api/admin/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    if (username !== ADMIN_USERNAME) {
+    if (!username || username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()) {
       return res.status(401).json({
         success: false,
         error: "Invalid credentials"
