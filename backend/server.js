@@ -3,85 +3,98 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 import yahooFinance from 'yahoo-finance2';
-import bcrypt from "bcrypt";
-import session from "express-session";
-import connectPgSimple from 'connect-pg-simple';
-
-
-
+import bcrypt from "bcryptjs";
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
-const PgSession = connectPgSimple(session);
-
-// Resolve directory paths for ES Modules to serve static assets
 
 const ADMIN_USERNAME = "Admin";
 const ADMIN_PASSWORD_HASH = "$2b$10$0gRpJQow6s3WlGlHPUWWfO4Z1UIYBAyiSPoYY9d7tb9ojAdg/KeZy";
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production' || !!process.env.VERCEL;
+const SESSION_SECRET = process.env.SESSION_SECRET || "admin-secret";
 
 /* =========================
    MIDDLEWARE & SECURITY
 ========================= */
 
+// Dynamic CORS configurations
+const allowedOrigins = [
+  'http://localhost:5173', 
+  'http://127.0.0.1:5173', 
+  'https://full-stack-excell.vercel.app', 
+  'https://full-stack-excell.onrender.com'
+];
 
-app.use(session({
-  store: new PgSession({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: true
-  }),
-  secret: process.env.SESSION_SECRET || "admin-secret",
-  resave: false,
-  saveUninitialized: false,
-  name: "admin_sid",
-  cookie: {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    maxAge: 24 * 60 * 60 * 1000
-  }
-}));
-// Dynamic CORS adjustments for development flexibility
-const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://full-stack-excell.vercel.app/', 'https://full-stack-excell.onrender.com/'];
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+    if (!origin) {
+      return callback(null, true);
     }
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes(origin + '/')) {
+      return callback(null, true);
+    }
+    try {
+      const url = new URL(origin);
+      if (url.hostname.endsWith('.vercel.app') || url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+        return callback(null, true);
+      }
+    } catch (e) {
+      // Ignore URL parsing errors
+    }
+    callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Explicitly handle preflight for all routes
 app.options('*', cors());
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "admin-secret",
-    resave: false,
-    saveUninitialized: false,
-    name: "admin_sid", 
-    cookie: {
-      httpOnly: true,
-      // Production demands secure cookies over HTTPS, Local fallback allows plain HTTP
-      secure: isProduction, 
-      // Lax handles same-site architecture flawlessly; 'none' is requested if domains completely fork
-      sameSite: isProduction ? "none" : "lax", 
-      maxAge: 24 * 60 * 60 * 1000 // 1 Day
+// Stateless JWT cookie-based session middleware
+app.use((req, res, next) => {
+  const cookieHeader = req.headers.cookie || '';
+  const cookies = {};
+  cookieHeader.split(';').forEach(cookie => {
+    const parts = cookie.split('=');
+    if (parts.length >= 2) {
+      cookies[parts[0].trim()] = decodeURIComponent(parts.slice(1).join('='));
     }
-  })
-);
+  });
+
+  const token = cookies.admin_sid;
+  req.session = {};
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, SESSION_SECRET);
+      req.session = decoded;
+    } catch (err) {
+      // Token invalid or expired, continue silently
+    }
+  }
+
+  // Session destruction helper
+  req.session.destroy = (callback) => {
+    req.session = {};
+    res.cookie("admin_sid", "", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      expires: new Date(0)
+    });
+    if (callback) callback(null);
+  };
+
+  next();
+});
 
 /* =========================
    AUTH MIDDLEWARE
@@ -184,6 +197,15 @@ app.post("/api/admin/login", async (req, res) => {
 
     req.session.isAdmin = true;
 
+    // Sign stateless JWT cookie
+    const token = jwt.sign({ isAdmin: true }, SESSION_SECRET, { expiresIn: '1d' });
+    res.cookie("admin_sid", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 24 * 60 * 60 * 1000 // 1 Day
+    });
+
     return res.json({
       success: true,
       message: "Logged in"
@@ -205,7 +227,7 @@ app.get("/api/admin/check", (req, res) => {
 });
 
 app.post("/api/admin/logout", (req, res) => {
- try {
+  try {
     req.session.destroy((err) => {
       if (err) {
         return res.status(500).json({
@@ -213,10 +235,6 @@ app.post("/api/admin/logout", (req, res) => {
           error: "Logout failed"
         });
       }
-
-      // CRITICAL FIX: Clears your explicitly named cookie "admin_sid" instead of default "connect.sid"
-      res.clearCookie("admin_sid"); 
-
       return res.json({
         success: true,
         message: "Logged out successfully"
@@ -284,10 +302,12 @@ app.post('/api/rows', requireAdmin, async (req, res) => {
   }
 });
 
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
 /* =========================
    STATS
 ========================= */
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
 app.get('/api/stats', async (req, res) => {
   try {
     const totalStocks = await prisma.company.count();
@@ -361,16 +381,12 @@ app.get('/api/finance/:ticker', async (req, res) => {
 });
 
 /* =========================
-   PLAN C: SERVE FRONTEND STATIC ASSETS
-========================= */
-
-// Direct Node to find and serve the production compiled assets folder
-// Adjust '../frontend/dist' to point accurately from your server.js location to the frontend compiled directory
-
-
-/* =========================
    START SERVER
 ========================= */
-app.listen(PORT, () => {
-  console.log(`Backend server running in ${isProduction ? 'production' : 'development'} mode on port ${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Backend server running in ${isProduction ? 'production' : 'development'} mode on port ${PORT}`);
+  });
+}
+
+export default app;

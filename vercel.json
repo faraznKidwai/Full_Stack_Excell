@@ -1,11 +1,8 @@
 {
   "version": 2,
+  "outputDirectory": "frontend/dist",
   "rewrites": [
-    { "source": "/api/admin/login", "destination": "/api/admin/login.js" },
-    { "source": "/api/admin/check", "destination": "/api/admin/check.js" },
-    { "source": "/api/admin/logout", "destination": "/api/admin/logout.js" },
-    { "source": "/api/rows", "destination": "/api/rows.js" },
-    { "source": "/api/stats", "destination": "/api/stats.js" },
+    { "source": "/api/(.*)", "destination": "/api/index.js" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
