@@ -28,7 +28,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 ========================= */
 
 // Dynamic CORS adjustments for development flexibility
-const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173'];
+const allowedOrigins = ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://full-stack-excell.vercel.app/'];
 app.use(cors({
   origin: function (origin, callback) {
     // In production Plan C, requests are same-domain, so origin might be undefined.
