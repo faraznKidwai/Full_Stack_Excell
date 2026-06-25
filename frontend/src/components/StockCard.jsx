@@ -8,15 +8,17 @@ const StockCard = ({ company }) => {
     <>
       {/* Injected style to target only the border layout transitions safely */}
       <style>{`
-        #card-${company.ticker}.stock-card {
-          border: 1px solid #bbf7d0 !important; /* Light green covering all sides */
-          border-left: 1px solid #bbf7d0 !important; /* Overrides the old thick left-only accent bar */
-          transition: border-color 0.2s ease-in-out !important;
-        }
+ #card-${company.ticker}.stock-card {
+  border: 1px solid #bbf7d0 !important; /* Light green covering all sides */
+  border-left: 1px solid #bbf7d0 !important; /* Overrides old thick accent bar */
+  
+  /* CHANGE THIS LINE: Ensures border, shadows, and transforms all glide smoothly */
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important; 
+}
 
-        #card-${company.ticker}.stock-card:hover {
-          border-color: #047857 !important; /* Border turns dark green on hover */
-        }
+#card-${company.ticker}.stock-card:hover {
+  border-color: #047857 !important; /* Perimeter turns dark green on hover */
+}
       `}</style>
 
       <div className="stock-card" id={`card-${company.ticker}`}>
