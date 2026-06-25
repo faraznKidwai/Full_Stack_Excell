@@ -589,7 +589,7 @@ const UserView = () => {
               id="search-input"
               type="text"
               className="search-bar__input"
-              placeholder="Search by ticker, company name or sector..."
+              placeholder="Search by ticker, company name, sector or industry"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
