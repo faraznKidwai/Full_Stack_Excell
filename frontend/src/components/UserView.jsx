@@ -124,8 +124,8 @@ const UserView = () => {
       {/* ===== TOP BAR ===== */}
       <div className="topbar" id="topbar">
         <div className="topbar__inner">
-          <span className="topbar__item">
-            SEBI Registered Research Analyst — INH000016199
+          <span className="topbar__registration">
+            SEBI REGISTERED RA (INH000016199)
           </span>
           <div className="topbar__right">
             <a
@@ -134,10 +134,10 @@ const UserView = () => {
               rel="noopener noreferrer"
               className="topbar__link"
             >
-              <Phone size={11} /> +91-8694010200
+              <Phone size={13} strokeWidth={2.5} /> +91 8694010200
             </a>
             <a href="mailto:info@zamzam-capital.com" className="topbar__link">
-              <Mail size={11} /> info@zamzam-capital.com
+              <Mail size={13} strokeWidth={2.5} /> info@zamzam-capital.com
             </a>
           </div>
         </div>
