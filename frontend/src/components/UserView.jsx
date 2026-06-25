@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import StockCard from "./StockCard";
 import logo from "../assets/ZamZamWater_logo.jpg";
+import ".././App.css";
 
 const CARDS_PER_PAGE = 12;
 

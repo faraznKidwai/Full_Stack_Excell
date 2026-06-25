@@ -46,8 +46,8 @@ body {
 }
 
 /* ==========================================================================
-     1. LEFT HAND SIDEBAR SIDE PANEL
-     ========================================================================== */
+       1. LEFT HAND SIDEBAR SIDE PANEL
+       ========================================================================== */
 .sidebar-panel {
   width: 280px;
   background-color: var(--panel-white);
@@ -169,8 +169,8 @@ body {
 }
 
 /* ==========================================================================
-     2. MAIN CONTENT SCREEN WRAPPERS
-     ========================================================================== */
+       2. MAIN CONTENT SCREEN WRAPPERS
+       ========================================================================== */
 .main-content-area {
   flex-grow: 1;
   padding: 40px;
@@ -232,8 +232,8 @@ body {
 }
 
 /* ==========================================================================
-     3. PROFESSIONAL SPREADSHEET ENGINE
-     ========================================================================== */
+       3. PROFESSIONAL SPREADSHEET ENGINE
+       ========================================================================== */
 .table-container-scroller {
   overflow-x: auto;
   border-radius: 8px;
@@ -394,8 +394,8 @@ body {
 }
 
 /* ==========================================================================
-     4. STICKY ACTION PANEL BAR BOTTOM
-     ========================================================================== */
+       4. STICKY ACTION PANEL BAR BOTTOM
+       ========================================================================== */
 .sticky-action-bar-wrapper {
   position: fixed;
   bottom: 0;
@@ -510,8 +510,8 @@ body {
 }
 
 /* ==========================================================================
-     5. UPLOAD CONSOLE AND TOAST ENGINE
-     ========================================================================== */
+       5. UPLOAD CONSOLE AND TOAST ENGINE
+       ========================================================================== */
 .upload-zone {
   border: 2px dashed #cbd5e1;
   border-radius: 12px;
@@ -592,13 +592,8 @@ body {
 }
 
 /* ==========================================================================
-     PRODUCTION LIGHT GREEN & EMERALD LOGIN DESIGN ARCHITECTURE
-     ========================================================================== */
-/* ==========================================================================
-     ISOLATED LIGHT GREEN & EMERALD LOGIN DESIGN ARCHITECTURE
-     ========================================================================== */
-
-/* This wrapper acts as a full-screen shield ONLY for the login route */
+       PRODUCTION LIGHT GREEN & EMERALD LOGIN DESIGN ARCHITECTURE
+       ========================================================================== */
 .login-page-wrapper {
   position: fixed;
   top: 0;
@@ -608,8 +603,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8fafc; /* Matches var(--bg-workspace) safely */
-  z-index: 9999; /* Forces it over everything else safely, exclusively on its route */
+  background-color: #f8fafc;
+  z-index: 9999;
   padding: 20px;
   box-sizing: border-box;
 }
@@ -635,7 +630,7 @@ body {
   margin: 0 0 6px 0;
   font-size: 1.5rem;
   font-weight: 800;
-  color: #15803d; /* Safe hex fallback matching dashboard emerald */
+  color: #15803d;
   letter-spacing: -0.5px;
 }
 
@@ -645,7 +640,6 @@ body {
   color: #64748b;
 }
 
-/* Forms & Structural Inputs */
 .login-form {
   display: flex;
   flex-direction: column;
@@ -695,7 +689,6 @@ body {
   box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.1);
 }
 
-/* Call To Action Buttons */
 .login-submit-btn {
   width: 100%;
   background-color: #15803d;
@@ -741,17 +734,90 @@ body {
 }
 
 .sidebar-logout-clickable {
-  background-color: #ff0202 !important; /* Soft red alert background tint */
+  background-color: #ff0202 !important;
   color: #ffffff !important;
 }
 
 .sidebar-logout-clickable:hover {
-  background-color: #fa0303 !important; /* Soft red alert background tint */
-  color: #fca9a9 !important; /* Crimson text color */
+  background-color: #fa0303 !important;
+  color: #fca9a9 !important;
 }
 
-/* Ensure this is present in your global dashboard layout index.css/admin.css */
 .data-table td.cell-focused {
   outline: none !important;
-  box-shadow: inset 0 0 0 1px #15803d !important; /* Perfect 1px inner boundary perimeter trace */
+  box-shadow: inset 0 0 0 1px #15803d !important;
+}
+
+/* ==========================================================================
+       6. CARD COMPONENT LAYOUT ARCHITECTURE
+       ========================================================================== */
+.stock-card {
+  background-color: var(--panel-white);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+
+  /* Full perimeter light green setup */
+  border: 1px solid var(--mint-accent-border) !important;
+
+  /* Smooth transition tracking layout fields */
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Perimeter transitions cleanly to dark green on card hover without breaking animations */
+.stock-card:hover {
+  border-color: #047857 !important;
+}
+
+.stock-card__top {
+  margin-bottom: 16px;
+}
+
+.stock-card__title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.stock-card__ticker {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.stock-card__company {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.stock-card__details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--border-light);
+  padding-top: 12px;
+}
+
+.stock-card__detail-row {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.stock-card__detail-icon {
+  color: var(--text-muted);
+  margin-right: 8px;
+}
+
+.stock-card__detail-label {
+  color: var(--text-muted);
+  margin-right: 4px;
+}
+
+.stock-card__detail-value {
+  color: var(--text-main);
+  font-weight: 500;
 }
