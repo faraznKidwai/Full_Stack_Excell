@@ -749,3 +749,9 @@ body {
   background-color: #fa0303 !important; /* Soft red alert background tint */
   color: #fca9a9 !important; /* Crimson text color */
 }
+
+/* Ensure this is present in your global dashboard layout index.css/admin.css */
+.data-table td.cell-focused {
+  outline: none !important;
+  box-shadow: inset 0 0 0 1px #15803d !important; /* Perfect 1px inner boundary perimeter trace */
+}
