@@ -20,8 +20,10 @@
   /* Status Color Matrix */
   --halal-pill-bg: #dcfce7;
   --halal-pill-text: #15803d;
-  --nonhalal-pill-bg: #fee2e2;
-  --nonhalal-pill-text: #991b1b;
+
+  /* RE-ARCHITECTED: Deep Maroon Red Color Specifications */
+  --nonhalal-pill-bg: #fdf2f2;
+  --nonhalal-pill-text: #9b1c1c;
 
   --border-light: #e2e8f0;
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.02);
@@ -44,8 +46,8 @@ body {
 }
 
 /* ==========================================================================
-   1. LEFT HAND SIDEBAR SIDE PANEL
-   ========================================================================== */
+     1. LEFT HAND SIDEBAR SIDE PANEL
+     ========================================================================== */
 .sidebar-panel {
   width: 280px;
   background-color: var(--panel-white);
@@ -167,8 +169,8 @@ body {
 }
 
 /* ==========================================================================
-   2. MAIN CONTENT SCREEN WRAPPERS
-   ========================================================================== */
+     2. MAIN CONTENT SCREEN WRAPPERS
+     ========================================================================== */
 .main-content-area {
   flex-grow: 1;
   padding: 40px;
@@ -230,8 +232,8 @@ body {
 }
 
 /* ==========================================================================
-   3. PROFESSIONAL SPREADSHEET ENGINE
-   ========================================================================== */
+     3. PROFESSIONAL SPREADSHEET ENGINE
+     ========================================================================== */
 .table-container-scroller {
   overflow-x: auto;
   border-radius: 8px;
@@ -308,9 +310,10 @@ body {
   background-color: #f0fdf4 !important;
 }
 
+/* UPDATED: Fine-tuned focused box to create a precise thin perimeter border overlay */
 .data-table td.cell-focused {
-  outline: 2px solid var(--primary-emerald);
-  outline-offset: -2px;
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--primary-emerald);
 }
 
 /* Double-Click Input Override Overlays */
@@ -391,8 +394,8 @@ body {
 }
 
 /* ==========================================================================
-   4. STICKY ACTION PANEL BAR BOTTOM
-   ========================================================================== */
+     4. STICKY ACTION PANEL BAR BOTTOM
+     ========================================================================== */
 .sticky-action-bar-wrapper {
   position: fixed;
   bottom: 0;
@@ -507,8 +510,8 @@ body {
 }
 
 /* ==========================================================================
-   5. UPLOAD CONSOLE AND TOAST ENGINE
-   ========================================================================== */
+     5. UPLOAD CONSOLE AND TOAST ENGINE
+     ========================================================================== */
 .upload-zone {
   border: 2px dashed #cbd5e1;
   border-radius: 12px;
@@ -589,11 +592,11 @@ body {
 }
 
 /* ==========================================================================
-   PRODUCTION LIGHT GREEN & EMERALD LOGIN DESIGN ARCHITECTURE
-   ========================================================================== */
+     PRODUCTION LIGHT GREEN & EMERALD LOGIN DESIGN ARCHITECTURE
+     ========================================================================== */
 /* ==========================================================================
-   ISOLATED LIGHT GREEN & EMERALD LOGIN DESIGN ARCHITECTURE
-   ========================================================================== */
+     ISOLATED LIGHT GREEN & EMERALD LOGIN DESIGN ARCHITECTURE
+     ========================================================================== */
 
 /* This wrapper acts as a full-screen shield ONLY for the login route */
 .login-page-wrapper {
