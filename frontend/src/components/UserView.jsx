@@ -242,7 +242,8 @@ const UserView = () => {
             Stocks are updated for Shariah-compliance based on the latest Halal
             Stocks List issued by Zamzam Capital’s Shariah Board and includes
             all subsequently issued Mainboard IPOs listed on the National Stock
-            Exchange (NSE).
+            Exchange (NSE). Sectors excluded are Banking & Finance, Insurance,
+            Alcohol, Pork, Defence, Gambling, Tobacco, Media & Entertainment
           </p>
 
           <p
@@ -521,9 +522,9 @@ const UserView = () => {
                   margin: "0 0 16px 0",
                 }}
               >
-                Listed companies on the National Stock Exchange (NSE) with a
-                market capitalisation of at least INR 500 crore have been
-                certified as{" "}
+                The following listed companies on the National Stock Exchange
+                (NSE) with a market capitalisation of at least INR 500 crore
+                have been certified as{" "}
                 <strong style={{ color: "#0f172a" }}>Shariah Compliant</strong>{" "}
                 by the Shariah Board of Zamzam Capital, comprised of the
                 following Shariah Scholars:
