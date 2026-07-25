@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import StockCard from "./StockCard";
 import logo from "../assets/ZamZamWater_logo.jpg";
-import Footer from "./footer";
 import ".././App.css";
 
 const CARDS_PER_PAGE = 30;
@@ -33,6 +32,8 @@ const UserView = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [arraiImageError, setArraiImageError] = useState(false);
   const filterRef = useRef(null);
 
   useEffect(() => {
@@ -95,6 +96,19 @@ const UserView = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Monitor window scroll events for scroll-to-top feature
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 400) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   // Calculate total pages
   const totalPages = Math.ceil(filteredCompanies.length / CARDS_PER_PAGE);
 
@@ -113,9 +127,13 @@ const UserView = () => {
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
+      setCurrentPage((prev) => prev + 1);
       window.scrollTo({ top: document.getElementById("search-section")?.offsetTop || 0, behavior: "smooth" });
     }
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -155,6 +173,7 @@ const UserView = () => {
           <a
             href="https://zamzam-capital.com/"
             target="_blank"
+            rel="noopener noreferrer"
             className="main-nav__logo-link"
           >
             <span className="main-nav__brand">
@@ -166,6 +185,7 @@ const UserView = () => {
               href="https://zamzam-capital.com/shariah/ "
               className="main-nav__link main-nav__link--active"
               target="_blank"
+              rel="noopener noreferrer"
             >
               Shariah Compliance
             </a>
@@ -542,7 +562,8 @@ const UserView = () => {
                 Shariah Board of Zamzam Capital is published{" "}
                 <a
                   href="https://zamzam-capital.com/shariah/"
-                  target="blank"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style={{ color: "#02966c", textDecoration: "underline" }}
                 >
                   here
@@ -551,7 +572,8 @@ const UserView = () => {
                 the Shariah Board of Zamzam Capital that is published{" "}
                 <a
                   href="https://zamzam-capital.com/halal-stocks/"
-                  target="blank"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style={{ color: "#02966c", textDecoration: "underline" }}
                 >
                   here
@@ -657,7 +679,7 @@ const UserView = () => {
               </div>
             )}
 
-            {/* ===== NEW PAGINATION UI CONTROLS ===== */}
+            {/* ===== PAGINATION UI CONTROLS ===== */}
             {totalPages > 1 && (
               <div
                 style={{
@@ -728,8 +750,265 @@ const UserView = () => {
         )}
       </section>
 
-      {/* ===== FOOTER ===== */}
-      <Footer />
+      {/* ===== REDESIGNED COMPLIANCE FOOTER LAYOUT ===== */}
+      <footer
+        className="zamzam-sebi-exact-footer"
+        style={{
+          width: "100%",
+          textAlign: "left",
+          color: "#cbd5e1",
+          position: "relative",
+          fontFamily: "'Inter', sans-serif"
+        }}
+      >
+        {/* Emerald Green Primary Compliance Matrix */}
+        <div 
+          style={{ 
+            backgroundColor: "#0d4d3a", 
+            padding: "56px 20px" 
+          }}
+        >
+          <div style={{ maxWidth: "1200px", margin: "0 auto", width: "100%" }}>
+            
+            {/* 3-Column Profile Grid */}
+            <div 
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                gap: "32px",
+                fontSize: "13px"
+              }}
+            >
+              {/* Analyst Info Section */}
+              <div>
+                <h5 style={{ color: "#ffffff", fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", marginBottom: "12px" }}>
+                  SEBI Registered Research Analyst Details:
+                </h5>
+                <div style={{ color: "#e2e8f0", lineHeight: "1.6" }}>
+                  <p>Registration Name: Zamzam Capital</p>
+                  <p>Type of Registration: Non-Individual</p>
+                  <p>Registration No: INH000016199</p>
+                  <p>Validity: Jun 12, 2024 – Perpetual</p>
+                </div>
+                <div style={{ color: "#e2e8f0", lineHeight: "1.6", marginTop: "16px" }}>
+                  <p>Principal Officer: Mr. Saif Ahmed</p>
+                  <p style={{ margin: 0 }}>Email: <a href="mailto:po@zamzam-capital.com" style={{ color: "inherit", textDecoration: "underline" }}>po@zamzam-capital.com</a></p>
+                  <p>Tel: +91 8694010200</p>
+                </div>
+              </div>
+
+              {/* SEBI HQ Info Section */}
+              <div>
+                <h5 style={{ color: "#ffffff", fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", marginBottom: "12px" }}>
+                  SEBI Office Address:
+                </h5>
+                <div style={{ color: "#e2e8f0", lineHeight: "1.6" }}>
+                  <p>7th Floor, 756-L, Anna Salai</p>
+                  <p>Chennai – 600002, Tamil Nadu</p>
+                  <p>Tel. Board: +91-44- 28880222 / 28526686</p>
+                  <p style={{ margin: 0 }}>E-mail : <a href="mailto:sebisro@sebi.gov.in" style={{ color: "inherit", textDecoration: "underline" }}>sebisro@sebi.gov.in</a></p>
+                </div>
+                <div style={{ color: "#e2e8f0", lineHeight: "1.6", marginTop: "16px" }}>
+                  <p>Compliance Officer: Mr. Shafik Ahmed</p>
+                  <p style={{ margin: 0 }}>Email: <a href="mailto:co@zamzam-capital.com" style={{ color: "inherit", textDecoration: "underline" }}>co@zamzam-capital.com</a></p>
+                  <p>Tel: +91 8694010200</p>
+                </div>
+              </div>
+
+              {/* Registered Location Section */}
+              <div>
+                <h5 style={{ color: "#ffffff", fontSize: "14px", fontWeight: 700, letterSpacing: "0.02em", marginBottom: "12px" }}>
+                  Registered Address:
+                </h5>
+                <div style={{ color: "#e2e8f0", lineHeight: "1.6" }}>
+                  <p>No. 6 Berlie Street</p>
+                  <p>Langford Town</p>
+                  <p>Shanthinagar</p>
+                  <p>Bangalore – 560025, Karnataka</p>
+                </div>
+                <div style={{ color: "#e2e8f0", lineHeight: "1.6", marginTop: "16px" }}>
+                  <p>Grievance Officer: Mr. Shafik Ahmed</p>
+                  <p style={{ margin: 0 }}>Email: <a href="mailto:go@zamzam-capital.com" style={{ color: "inherit", textDecoration: "underline" }}>go@zamzam-capital.com</a></p>
+                  <p>Tel: +91 8694010200</p>
+                </div>
+              </div>
+            </div>
+
+            <hr style={{ border: 0, borderTop: "1px solid rgba(255, 255, 255, 0.1)", margin: "24px 0" }} />
+
+            {/* Grievance Narrative Framework */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "13px", color: "#e2e8f0", lineHeight: "1.6" }}>
+              <p style={{ margin: 0 }}>
+                For any service related assistance or grievances, you can reach us at{" "}
+                <a href="mailto:support@zamzam-capital.com" style={{ color: "inherit", textDecoration: "underline", fontWeight: 500 }}>support@zamzam-capital.com</a>. 
+                We take minimum 15 working days to respond or to come up with the solution of your query. If you are unsatisfied with our response then you can escalate your issue to SEBI{" "}
+                <a href="https://scores.sebi.gov.in/" target="_blank" rel="noopener noreferrer" style={{ color: "#a3e635", textDecoration: "underline", fontWeight: 700 }}>SCORES</a>.
+              </p>
+              <p style={{ margin: 0 }}>
+                With regard to physical complaints, investors may send their complaints to: Office of Investor Assistance and Education, Securities and Exchange Board of India, SEBI Bhavan. Plot No. C4-A, ‘G’ Block, Bandra-Kurla Complex, Bandra (E), Mumbai – 400 051.
+              </p>
+              <p style={{ margin: 0 }}>
+                <a href="#" style={{ color: "#a3e635", textDecoration: "underline", fontWeight: 700 }}>ODR Portal</a> could be accessed, if unsatisfied with the response. Your attention is drawn to the SEBI circular no. SEBI/HO/OIAE/OIAE_IAD-1/P/CIR/2023/131 dated July 31, 2023, on “Online Resolution of Disputes in the Indian Securities Market”.
+              </p>
+              <p style={{ marginTop: "4px", color: "#cbd5e1", margin: 0 }}>
+                Google Play:{" "}
+                <a href="https://play.google.com/store/search?q=sebi+scores&c=apps" target="_blank" rel="noopener noreferrer" style={{ color: "#a3e635", textDecoration: "underline", fontWeight: 500 }}>Get the App</a>{" "}
+                (Or) Search for “SEBI SCORES” in Google Play Link to SEBI Scores App
+                <br />
+                Apple Store:{" "}
+                <a href="https://apps.apple.com/in/app/sebiscores/id6478849917" target="_blank" rel="noopener noreferrer" style={{ color: "#a3e635", textDecoration: "underline", fontWeight: 500 }}>Get the App</a>{" "}
+                (Or) Search for “SEBI SCORES” in Apple App Store on website
+              </p>
+            </div>
+
+            <hr style={{ border: 0, borderTop: "1px solid rgba(255, 255, 255, 0.1)", margin: "24px 0" }} />
+
+            {/* Standard Legal Warnings */}
+            <div style={{ fontSize: "11px", color: "rgba(203, 213, 225, 0.9)", lineHeight: "1.6" }}>
+              <p style={{ marginBottom: "8px" }}>
+                <span style={{ fontWeight: 700, fontStyle: "italic", color: "#ffffff" }}>Disclaimer:</span>{" "}
+                “Registration granted by SEBI and certification from NISM in no way guarantee performance of the intermediary or provide any assurance of returns to investors.”
+              </p>
+              <p style={{ margin: 0 }}>
+                <span style={{ fontWeight: 700, fontStyle: "italic", color: "#ffffff" }}>Standard warning:</span>{" "}
+                “Investment in securities market are subject to market risks. Read all the related documents carefully before investing.”
+              </p>
+            </div>
+
+            {/* ARRAI Brand Frame */}
+            <div style={{ marginTop: "32px", display: "flex", alignItems: "center", gap: "12px" }}>
+              <span style={{ fontSize: "12px", fontStyle: "italic", color: "#ffffff", fontWeight: 500 }}>Proud member of</span>
+              <div 
+                style={{ 
+                  backgroundColor: "#ffffff", 
+                  padding: "8px", 
+                  borderRadius: "4px", 
+                  maxWidth: "200px", 
+                  minHeight: "44px", 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center" 
+                }}
+              >
+                {!arraiImageError ? (
+                  <img 
+                    src="https://arrai.org.in/wp-content/uploads/2021/09/ARRAI_Full-Lockup_2x.png" 
+                    alt="Association of Registered Research Analysts of India" 
+                    style={{ height: "36px", width: "100%", objectFit: "contain" }}
+                    onError={() => setArraiImageError(true)}
+                  />
+                ) : (
+                  <span style={{ fontSize: "10px", color: "#1e3a8a", fontWeight: 700, textAlign: "center", lineHeight: "1.2" }}>
+                    Association of Registered<br />Research Analysts of India
+                  </span>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Clean White Bottom Navigation Row */}
+        <div 
+          style={{ 
+            backgroundColor: "#ffffff", 
+            color: "#64748b", 
+            fontSize: "11px", 
+            padding: "20px 20px", 
+            borderTop: "1px solid #e2e8f0", 
+            textAlign: "center" 
+          }}
+        >
+          <div style={{ maxWidth: "1200px", margin: "0 auto", width: "100%" }}>
+            <p style={{ lineHeight: "2.2", margin: 0 }}>
+              © All Rights Reserved |{" "}
+              <a href="https://zamzam-capital.com/compliance/?jump=complaints" style={{ color: "#64748b", textDecoration: "underline" }}>Complaints Board</a> |{" "}
+              <a href="https://zamzam-capital.com/compliance/?jump=terms" style={{ color: "#64748b", textDecoration: "underline" }}>Terms &amp; Conditions</a> |{" "}
+              <a href="https://zamzam-capital.com/compliance/?jump=gre" style={{ color: "#64748b", textDecoration: "underline" }}>Grievance Redressal Mechanism</a> |{" "}
+              <a href="https://zamzam-capital.com/compliance/?jump=conduct" style={{ color: "#64748b", textDecoration: "underline" }}>Code of Conduct</a> |{" "}
+              <a href="https://zamzam-capital.com/compliance/?jump=da" style={{ color: "#64748b", textDecoration: "underline" }}>Disclosure Advice</a>
+            </p>
+            <p style={{ lineHeight: "2.2", margin: 0, marginTop: "8px" }}>
+              <a href="https://zamzam-capital.com/compliance/?jump=privacy" style={{ color: "#64748b", textDecoration: "underline" }}>Privacy Policy</a> |{" "}
+              <a href="https://zamzam-capital.com/compliance/?jump=internal" style={{ color: "#64748b", textDecoration: "underline" }}>Internal Policy</a> |{" "}
+              <a href="https://zamzam-capital.com/compliance/?jump=aml" style={{ color: "#64748b", textDecoration: "underline" }}>AML Policy</a> |{" "}
+              <a href="https://zamzam-capital.com/compliance/?jump=refund" style={{ color: "#64748b", textDecoration: "underline" }}>Refund Policy</a> |{" "}
+              <a href="https://zamzam-capital.com/compliance/?jump=disclosure" style={{ color: "#64748b", textDecoration: "underline" }}>Disclosure</a> |{" "}
+              <a href="https://zamzam-capital.com/compliance/?jump=disclaimer" style={{ color: "#64748b", textDecoration: "underline" }}>Disclaimer</a> |{" "}
+              <a href="https://zamzam-capital.com/compliance/?jump=investor" style={{ color: "#64748b", textDecoration: "underline" }}>Investor Charter</a> |{" "}
+              <span style={{ color: "#334155", fontWeight: 600 }}>Zamzam Capital (#INH000016199)</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Tailored Geometry Developer Stamp */}
+        <div style={{ backgroundColor: "#ffffff", display: "flex", justifyContent: "center", padding: "4px 16px 20px 16px" }}>
+          <div
+            style={{
+              position: "relative",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "8px 20px",
+              fontSize: "10px",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+              color: "#ffffff",
+              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.15)",
+              background: "linear-gradient(90deg, rgba(0,143,122,0.95), rgba(6,111,93,0.95))",
+              clipPath: "polygon(0 0, 100% 0, 96% 100%, 4% 100%)",
+            }}
+          >
+            <span style={{ color: "rgba(255, 255, 255, 0.85)" }}>Developed by</span>
+            <a
+              href="https://aquibyazdani.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontWeight: 700, color: "#ffffff", transition: "color 0.2s ease", textDecoration: "none" }}
+            >
+              aquibyazdani.com
+            </a>
+          </div>
+        </div>
+      </footer>
+
+      {/* Floating Scroll-to-Top Component Action */}
+      <button
+        onClick={scrollToTop}
+        aria-label="Scroll to top"
+        type="button"
+        style={{
+          position: "fixed",
+          bottom: "95px",
+          right: "20px",
+          zIndex: 99999,
+          width: "44px",
+          height: "44px",
+          backgroundColor: "#0fa978",
+          color: "#ffffff",
+          border: "none",
+          borderRadius: "50%",
+          cursor: "pointer",
+          display: showScrollTop ? "flex" : "none",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+          transition: "background-color 0.2s, transform 0.2s",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = "#0c8e64";
+          e.currentTarget.style.transform = "translateY(-2px)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = "#0fa978";
+          e.currentTarget.style.transform = "translateY(0)";
+        }}
+      >
+        <svg viewBox="0 0 24 24" style={{ width: "20px", height: "20px", fill: "none", stroke: "currentColor", strokeWidth: "2.5" }}>
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+      </button>
     </div>
   );
 };
