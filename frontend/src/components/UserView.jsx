@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Search,
   SlidersHorizontal,
@@ -8,18 +8,21 @@ import {
   ChevronUp,
   X,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import StockCard from "./StockCard";
 import logo from "../assets/ZamZamWater_logo.jpg";
+import Footer from "./footer";
 import ".././App.css";
 
-const CARDS_PER_PAGE = 12;
+const CARDS_PER_PAGE = 30;
 
 const UserView = () => {
   const [companies, setCompanies] = useState([]);
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
   const [filteredCompanies, setFilteredCompanies] = useState([]);
-  const [visibleCount, setVisibleCount] = useState(CARDS_PER_PAGE);
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSector, setSelectedSector] = useState("");
   const [sectors, setSectors] = useState([]);
@@ -30,14 +33,12 @@ const UserView = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-  const loadMoreRef = useRef(null);
   const filterRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Using relative URLs here maps perfectly to Vercel Serverless in production
         const [rowsRes, statsRes] = await Promise.all([
           fetch(`${import.meta.env.VITE_API_URL}/api/rows`),
           fetch(`${import.meta.env.VITE_API_URL}/api/stats`),
@@ -81,25 +82,8 @@ const UserView = () => {
     }
 
     setFilteredCompanies(filtered);
-    setVisibleCount(CARDS_PER_PAGE);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [searchQuery, selectedSector, companies]);
-
-  const handleObserver = useCallback((entries) => {
-    const target = entries[0];
-    if (target.isIntersecting) {
-      setVisibleCount((prev) => prev + CARDS_PER_PAGE);
-    }
-  }, []);
-
-  useEffect(() => {
-    const node = loadMoreRef.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(handleObserver, {
-      threshold: 0.1,
-    });
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [handleObserver, filteredCompanies]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -111,7 +95,28 @@ const UserView = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const visibleCards = filteredCompanies.slice(0, visibleCount);
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredCompanies.length / CARDS_PER_PAGE);
+
+  // Get index slices for the current page slice
+  const startIndex = (currentPage - 1) * CARDS_PER_PAGE;
+  const endIndex = startIndex + CARDS_PER_PAGE;
+  const visibleCards = filteredCompanies.slice(startIndex, endIndex);
+
+  // Pagination Handlers
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+      window.scrollTo({ top: document.getElementById("search-section")?.offsetTop || 0, behavior: "smooth" });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+      window.scrollTo({ top: document.getElementById("search-section")?.offsetTop || 0, behavior: "smooth" });
+    }
+  };
 
   return (
     <div
@@ -227,8 +232,7 @@ const UserView = () => {
               margin: "0 0 20px 0",
             }}
           >
-            Search, Screen &amp; Filter Zamzam Capital’s updated Halal Stocks
-            List
+            Search, Screen &amp; Filter Zamzam Capital’s updated Halal Stocks List
           </h2>
 
           <p
@@ -241,8 +245,8 @@ const UserView = () => {
             }}
           >
             Stocks are updated for Shariah-compliance based on the latest Halal
-            Stocks List issued by Zamzam Capital’s Shariah Board and includes
-            all subsequently issued Mainboard IPOs listed on the National Stock
+            Stocks List issued by Zamzam Capital’s Shariah Board and includes all
+            subsequently issued Mainboard IPOs listed on the National Stock
             Exchange (NSE). Sectors excluded are Banking & Finance, Insurance,
             Alcohol, Pork, Defence, Gambling, Tobacco, Media & Entertainment
           </p>
@@ -255,9 +259,9 @@ const UserView = () => {
               margin: "0 0 40px 0",
             }}
           >
-            <strong>Note :</strong> Zamzam Capital updates the
-            Shariah-compliance of Mainboard IPOs before their Offer Date on an
-            on-going basis through its{" "}
+            <strong>Note :</strong> Zamzam Capital updates the Shariah-compliance
+            of Mainboard IPOs before their Offer Date on an on-going basis through
+            its{" "}
             <a
               href="https://t.me/zamzamcapital"
               target="_blank"
@@ -272,7 +276,7 @@ const UserView = () => {
             </a>
           </p>
 
-          {/* Clean Light Stats Cards Deck */}
+          {/* Stats Deck */}
           <div
             style={{
               display: "grid",
@@ -281,7 +285,6 @@ const UserView = () => {
               marginTop: "20px",
             }}
           >
-            {/* Total Stocks Covered */}
             <div
               style={{
                 backgroundColor: "#ffffff",
@@ -311,9 +314,7 @@ const UserView = () => {
                   margin: "0 0 8px 0",
                 }}
               >
-                {stats.totalStocks
-                  ? stats.totalStocks.toLocaleString()
-                  : "1,694"}
+                {stats.totalStocks ? stats.totalStocks.toLocaleString() : "1,694"}
               </h3>
               <p
                 style={{
@@ -323,12 +324,11 @@ const UserView = () => {
                   lineHeight: "1.5",
                 }}
               >
-                Only NSE-listed stocks with Market Cap &gt; INR 500 Cr are
-                included in our screening universe.
+                Only NSE-listed stocks with Market Cap &gt; INR 500 Cr are included
+                in our screening universe.
               </p>
             </div>
 
-            {/* Halal Certified Stocks */}
             <div
               style={{
                 backgroundColor: "#ffffff",
@@ -372,7 +372,6 @@ const UserView = () => {
               </p>
             </div>
 
-            {/* Sectors Covered */}
             <div
               style={{
                 backgroundColor: "#ffffff",
@@ -412,8 +411,8 @@ const UserView = () => {
                   lineHeight: "1.5",
                 }}
               >
-                Sectors excluded BFSI, Alcohol, Pork, Defense, Gambling, Media
-                &amp; Entertainment.
+                Sectors excluded BFSI, Alcohol, Pork, Defense, Gambling, Media &amp;
+                Entertainment.
               </p>
             </div>
           </div>
@@ -438,7 +437,6 @@ const UserView = () => {
             transition: "all 0.3s ease",
           }}
         >
-          {/* Header Bar - Always Visible & Clickable */}
           <div
             onClick={() => setIsNoticeOpen(!isNoticeOpen)}
             style={{
@@ -476,30 +474,17 @@ const UserView = () => {
                 Certification Notice
               </h3>
             </div>
-            <div
-              style={{
-                color: "#02966c",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              {isNoticeOpen ? (
-                <ChevronUp size={22} />
-              ) : (
-                <ChevronDown size={22} />
-              )}
+            <div style={{ color: "#02966c", display: "flex", alignItems: "center" }}>
+              {isNoticeOpen ? <ChevronUp size={22} /> : <ChevronDown size={22} />}
             </div>
           </div>
 
-          {/* Collapsible Content Section */}
           <div
             style={{
               maxHeight: isNoticeOpen ? "1000px" : "0px",
               opacity: isNoticeOpen ? 1 : 0,
               transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-              borderTop: isNoticeOpen
-                ? "1px solid #f1f5f9"
-                : "1px solid transparent",
+              borderTop: isNoticeOpen ? "1px solid #f1f5f9" : "1px solid transparent",
             }}
           >
             <div style={{ padding: "32px" }}>
@@ -511,8 +496,8 @@ const UserView = () => {
                   margin: "0 0 16px 0",
                 }}
               >
-                Halal List Comprised of Shariah-Compliant Shares listed in the
-                Indian Stock Market
+                Halal List Comprised of Shariah-Compliant Shares listed in the Indian
+                Stock Market
               </h4>
 
               <p
@@ -523,12 +508,10 @@ const UserView = () => {
                   margin: "0 0 16px 0",
                 }}
               >
-                The following listed companies on the National Stock Exchange
-                (NSE) with a market capitalisation of at least INR 500 crore
-                have been certified as{" "}
-                <strong style={{ color: "#0f172a" }}>Shariah Compliant</strong>{" "}
-                by the Shariah Board of Zamzam Capital, comprised of the
-                following Shariah Scholars:
+                The following listed companies on the National Stock Exchange (NSE) with
+                a market capitalisation of at least INR 500 crore have been certified as{" "}
+                <strong style={{ color: "#0f172a" }}>Shariah Compliant</strong> by the
+                Shariah Board of Zamzam Capital, comprised of the following Shariah Scholars:
               </p>
 
               <ul
@@ -554,10 +537,9 @@ const UserView = () => {
                   margin: 0,
                 }}
               >
-                Shariah-compliance screening covers business activity, financial
-                ratios analysis and qualitative research parameters. The
-                criteria used by the Shariah Board of Zamzam Capital is
-                published{" "}
+                Shariah-compliance screening covers business activity, financial ratios
+                analysis and qualitative research parameters. The criteria used by the
+                Shariah Board of Zamzam Capital is published{" "}
                 <a
                   href="https://zamzam-capital.com/shariah/"
                   target="blank"
@@ -565,8 +547,8 @@ const UserView = () => {
                 >
                   here
                 </a>
-                . This Screener will use data from the latest Halal Stocks List
-                issued by the Shariah Board of Zamzam Capital that is published{" "}
+                . This Screener will use data from the latest Halal Stocks List issued by
+                the Shariah Board of Zamzam Capital that is published{" "}
                 <a
                   href="https://zamzam-capital.com/halal-stocks/"
                   target="blank"
@@ -607,27 +589,21 @@ const UserView = () => {
           <div className="filter-wrapper" ref={filterRef}>
             <button
               id="filter-btn"
-              className={`filter-btn ${
-                selectedSector ? "filter-btn--active" : ""
-              }`}
+              className={`filter-btn ${selectedSector ? "filter-btn--active" : ""}`}
               onClick={() => setShowFilterDropdown((prev) => !prev)}
             >
               <SlidersHorizontal size={15} />
               <span>{selectedSector || "All Sectors"}</span>
               <ChevronDown
                 size={14}
-                className={`filter-btn__chevron ${
-                  showFilterDropdown ? "open" : ""
-                }`}
+                className={`filter-btn__chevron ${showFilterDropdown ? "open" : ""}`}
               />
             </button>
 
             {showFilterDropdown && (
               <div className="filter-dropdown">
                 <button
-                  className={`filter-dropdown__item ${
-                    !selectedSector ? "active" : ""
-                  }`}
+                  className={`filter-dropdown__item ${!selectedSector ? "active" : ""}`}
                   onClick={() => {
                     setSelectedSector("");
                     setShowFilterDropdown(false);
@@ -638,9 +614,7 @@ const UserView = () => {
                 {sectors.map((sector) => (
                   <button
                     key={sector}
-                    className={`filter-dropdown__item ${
-                      selectedSector === sector ? "active" : ""
-                    }`}
+                    className={`filter-dropdown__item ${selectedSector === sector ? "active" : ""}`}
                     onClick={() => {
                       setSelectedSector(sector);
                       setShowFilterDropdown(false);
@@ -655,8 +629,8 @@ const UserView = () => {
         </div>
 
         <div className="search-section__meta">
-          Showing {Math.min(visibleCount, filteredCompanies.length)} of{" "}
-          {filteredCompanies.length} stocks
+          Showing {filteredCompanies.length > 0 ? startIndex + 1 : 0} -{" "}
+          {Math.min(endIndex, filteredCompanies.length)} of {filteredCompanies.length} stocks
         </div>
       </section>
 
@@ -675,13 +649,6 @@ const UserView = () => {
               ))}
             </div>
 
-            {visibleCount < filteredCompanies.length && (
-              <div ref={loadMoreRef} className="load-more-trigger">
-                <Loader2 size={22} className="spin" />
-                Loading more stocks...
-              </div>
-            )}
-
             {filteredCompanies.length === 0 && (
               <div className="no-results">
                 <Search size={48} strokeWidth={1.2} />
@@ -689,23 +656,80 @@ const UserView = () => {
                 <p>Try adjusting your search or filter criteria</p>
               </div>
             )}
+
+            {/* ===== NEW PAGINATION UI CONTROLS ===== */}
+            {totalPages > 1 && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "16px",
+                  marginTop: "40px",
+                  paddingBottom: "20px",
+                }}
+              >
+                <button
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "10px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid #e2e8f0",
+                    backgroundColor: currentPage === 1 ? "#f1f5f9" : "#ffffff",
+                    color: currentPage === 1 ? "#94a3b8" : "#0f172a",
+                    cursor: currentPage === 1 ? "not-allowed" : "pointer",
+                    fontWeight: "500",
+                    fontSize: "0.9rem",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  <ChevronLeft size={16} />
+                  Previous
+                </button>
+
+                <span
+                  style={{
+                    fontSize: "0.9rem",
+                    color: "#475569",
+                    fontWeight: "500",
+                  }}
+                >
+                  Page {currentPage} of {totalPages}
+                </span>
+
+                <button
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px",
+                    padding: "10px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid #e2e8f0",
+                    backgroundColor: currentPage === totalPages ? "#f1f5f9" : "#ffffff",
+                    color: currentPage === totalPages ? "#94a3b8" : "#0f172a",
+                    cursor: currentPage === totalPages ? "not-allowed" : "pointer",
+                    fontWeight: "500",
+                    fontSize: "0.9rem",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  Next
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
           </>
         )}
       </section>
 
       {/* ===== FOOTER ===== */}
-      <footer className="user-footer" id="user-footer">
-        <div className="user-footer__inner">
-          <p className="user-footer__copy">
-            &copy; {new Date().getFullYear()} Zamzam Capital. All rights
-            reserved.
-          </p>
-          <p className="user-footer__disclaimer">
-            Investment in securities market are subject to market risks. Read
-            all the related documents carefully before investing.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
