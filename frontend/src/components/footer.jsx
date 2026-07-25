@@ -23,97 +23,88 @@ export default function Footer() {
   return (
     <footer className="relative w-full text-left font-sans text-slate-300">
       
-      {/* Upper Green Background Block matching the image structure but keeping your original deep green dark theme gradient */}
-      <div 
-        className="relative overflow-hidden px-5 py-14 lg:px-8 lg:py-16" 
-        style={{ background: 'radial-gradient(1200px 500px at 20% 0%, #0d4d3a25 0%, transparent 60%), #0d4d3a' }}
-      >
-        {/* Subtle decorative dot grid background */}
-        <div 
-          className="absolute inset-0 opacity-20 pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '28px 28px' }} 
-        />
-
+      {/* Upper Green Background Block - Changed to Solid Green to match the image */}
+      <div className="relative bg-[#0d4d3a] px-5 py-12 lg:px-8 lg:py-14">
         <div className="relative max-w-7xl mx-auto">
           
-          {/* ==================== UPPER SECTION: 3-COLUMN COMPLIANCE ADDRESS MATRIX ==================== */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12 text-center md:text-left">
+          {/* ==================== UPPER SECTION: 3-COLUMN MATRIX ==================== */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left text-[13px]">
             
             {/* Column 1: Analyst Details */}
             <div>
-              <h5 className="text-white text-[15px] font-bold tracking-wide mb-3">
+              <h5 className="text-white font-bold tracking-wide mb-3 text-[14px]">
                 SEBI Registered Research Analyst Details:
               </h5>
-              <p className="text-sm leading-relaxed text-slate-100/90 space-y-1">
-                <span className="block">Registration Name: Zamzam Capital</span>
-                <span className="block">Type of Registration: Non-Individual</span>
-                <span className="block">Registration No: INH000016199</span>
-                <span className="block">Validity: Jun 12, 2024 – Perpetual</span>
-              </p>
-              <p className="mt-5 text-sm leading-relaxed text-slate-100/90 space-y-1">
-                <span className="block">Principal Officer: Mr. Saif Ahmed</span>
-                <span className="block">
-                  Email: <a href="mailto:po@zamzam-capital.com" className="hover:text-emerald-300 transition-colors underline">po@zamzam-capital.com</a>
-                </span>
-                <span className="block">Tel: +91 8694010200</span>
-              </p>
+              <div className="leading-relaxed text-slate-200 space-y-0.5">
+                <p>Registration Name: Zamzam Capital</p>
+                <p>Type of Registration: Non-Individual</p>
+                <p>Registration No: INH000016199</p>
+                <p>Validity: Jun 12, 2024 – Perpetual</p>
+              </div>
+              <div className="mt-4 leading-relaxed text-slate-200 space-y-0.5">
+                <p>Principal Officer: Mr. Saif Ahmed</p>
+                <p>
+                  Email: <a href="mailto:po@zamzam-capital.com" className="hover:underline">po@zamzam-capital.com</a>
+                </p>
+                <p>Tel: +91 8694010200</p>
+              </div>
             </div>
 
             {/* Column 2: SEBI Office Address */}
             <div>
-              <h5 className="text-white text-[15px] font-bold tracking-wide mb-3">
+              <h5 className="text-white font-bold tracking-wide mb-3 text-[14px]">
                 SEBI Office Address:
               </h5>
-              <p className="text-sm leading-relaxed text-slate-100/90 space-y-1">
-                <span className="block">7th Floor, 756-L, Anna Salai</span>
-                <span className="block">Chennai – 600002, Tamil Nadu</span>
-                <span className="block">Tel. Board: +91-44- 28880222 / 28526686</span>
-                <span className="block">
-                  E-mail : <a href="mailto:sebisro@sebi.gov.in" className="hover:text-emerald-300 transition-colors underline">sebisro@sebi.gov.in</a>
-                </span>
-              </p>
-              <p className="mt-5 text-sm leading-relaxed text-slate-100/90 space-y-1">
-                <span className="block">Compliance Officer: Mr. Shafik Ahmed</span>
-                <span className="block">
-                  Email: <a href="mailto:co@zamzam-capital.com" className="hover:text-emerald-300 transition-colors underline">co@zamzam-capital.com</a>
-                </span>
-                <span className="block">Tel: +91 8694010200</span>
-              </p>
+              <div className="leading-relaxed text-slate-200 space-y-0.5">
+                <p>7th Floor, 756-L, Anna Salai</p>
+                <p>Chennai – 600002, Tamil Nadu</p>
+                <p>Tel. Board: +91-44- 28880222 / 28526686</p>
+                <p>
+                  E-mail: <a href="mailto:sebisro@sebi.gov.in" className="hover:underline">sebisro@sebi.gov.in</a>
+                </p>
+              </div>
+              <div className="mt-4 leading-relaxed text-slate-200 space-y-0.5">
+                <p>Compliance Officer: Mr. Shafik Ahmed</p>
+                <p>
+                  Email: <a href="mailto:co@zamzam-capital.com" className="hover:underline">co@zamzam-capital.com</a>
+                </p>
+                <p>Tel: +91 8694010200</p>
+              </div>
             </div>
 
             {/* Column 3: Registered Address */}
             <div>
-              <h5 className="text-white text-[15px] font-bold tracking-wide mb-3">
+              <h5 className="text-white font-bold tracking-wide mb-3 text-[14px]">
                 Registered Address:
               </h5>
-              <p className="text-sm leading-relaxed text-slate-100/90 space-y-1">
-                <span className="block">No. 6 Berlie Street</span>
-                <span className="block">Langford Town</span>
-                <span className="block">Shanthinagar</span>
-                <span className="block">Bangalore – 560025, Karnataka</span>
-              </p>
-              <p className="mt-5 text-sm leading-relaxed text-slate-100/90 space-y-1">
-                <span className="block">Grievance Officer: Mr. Shafik Ahmed</span>
-                <span className="block">
-                  Email: <a href="mailto:go@zamzam-capital.com" className="hover:text-emerald-300 transition-colors underline">go@zamzam-capital.com</a>
-                </span>
-                <span className="block">Tel: +91 8694010200</span>
-              </p>
+              <div className="leading-relaxed text-slate-200 space-y-0.5">
+                <p>No. 6 Berlie Street</p>
+                <p>Langford Town</p>
+                <p>Shanthinagar</p>
+                <p>Bangalore – 560025, Karnataka</p>
+              </div>
+              <div className="mt-4 leading-relaxed text-slate-200 space-y-0.5">
+                <p>Grievance Officer: Mr. Shafik Ahmed</p>
+                <p>
+                  Email: <a href="mailto:go@zamzam-capital.com" className="hover:underline">go@zamzam-capital.com</a>
+                </p>
+                <p>Tel: +91 8694010200</p>
+              </div>
             </div>
           </div>
 
-          <hr className="border-white/20 my-8" />
+          <hr className="border-white/10 my-6" />
 
-          {/* ==================== MIDDLE SECTION: DETAILED GRIEVANCE & MOBILE LINKS ==================== */}
-          <div className="flex flex-col gap-4 text-sm text-slate-100/90 leading-relaxed text-justify md:text-left">
+          {/* ==================== MIDDLE SECTION: GRIEVANCE LINKS ==================== */}
+          <div className="flex flex-col gap-3 text-[13px] text-slate-200 leading-relaxed">
             <p>
               For any service related assistance or grievances, you can reach us at{' '}
-              <a href="mailto:support@zamzam-capital.com" className="hover:text-emerald-300 transition-colors underline font-medium">
+              <a href="mailto:support@zamzam-capital.com" className="underline font-medium">
                 support@zamzam-capital.com
               </a>
               . We take minimum 15 working days to respond or to come up with the solution of your query. If you are unsatisfied with our response then you can escalate your issue to SEBI{' '}
-              <a href="https://scores.sebi.gov.in/" target="_blank" rel="noopener noreferrer" className="text-lime-300 hover:text-lime-200 transition-colors underline uppercase font-bold tracking-wider">
-                SCORES
+              <a href="https://scores.sebi.gov.in/" target="_blank" rel="noopener noreferrer" className="text-lime-400 hover:text-lime-300 underline font-bold">
+                CHECK SCORES
               </a>.
             </p>
             
@@ -122,31 +113,39 @@ export default function Footer() {
             </p>
             
             <p>
-              <a href="#" className="text-lime-300 hover:text-lime-200 transition-colors underline font-bold">
+              <a href="#" className="text-lime-400 hover:text-lime-300 underline font-bold">
                 ODR Portal
               </a>{' '}
               could be accessed, if unsatisfied with the response. Your attention is drawn to the SEBI circular no. SEBI/HO/OIAE/OIAE_IAD-1/P/CIR/2023/131 dated July 31, 2023, on “Online Resolution of Disputes in the Indian Securities Market”.
             </p>
             
-            <p className="pt-2 text-slate-200">
-              <span className="font-semibold text-white">Google Play:</span>{' '}
-              <a href="https://play.google.com/store/search?q=sebi+scores&c=apps" target="_blank" rel="noopener noreferrer" className="text-lime-300 hover:text-lime-200 underline font-medium">
-                Get the App
-              </a>{' '}
-              (Or) Search for “SEBI SCORES” in Google Play Link to SEBI Scores App
+            <p className="mt-1 text-slate-300">
+              Google Play: <a href="#" className="text-lime-400 underline font-medium">Get the App on Google Play</a> (Or) Search for "SEBI SCORES" in Google Play Link to SEBI Scores App
               <br />
-              <span className="font-semibold text-white">Apple Store:</span>{' '}
-              <a href="https://apps.apple.com/in/app/sebiscores/id6478849917" target="_blank" rel="noopener noreferrer" className="text-lime-300 hover:text-lime-200 underline font-medium">
-                Get the App
-              </a>{' '}
-              (Or) Search for “SEBI SCORES” in Apple App Store on website
+              Apple Store: <a href="#" className="text-lime-400 underline font-medium">Get the App on Apple Store</a> (Or) Search for "SEBI SCORES" in Apple App Store on website
             </p>
           </div>
 
-          <hr className="border-white/20 my-8" />
+          <hr className="border-white/10 my-6" />
 
-          {/* ==================== REGULATORY DISCLAIMER / STANDARD WARNINGS ==================== */}
-          <div className="text-xs text-slate-200/90 leading-relaxed space-y-3">
+          {/* ==================== ADDED: QUICK NAVIGATION SECTION ==================== */}
+          <div className="text-[13px] mb-6">
+            <h5 className="text-white font-bold mb-2">Quick Navigation</h5>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-slate-200 font-medium">
+              <a href="#" className="hover:text-white transition-colors">Home</a>
+              <a href="#" className="hover:text-white transition-colors">About Us</a>
+              <a href="#" className="hover:text-white transition-colors">Shariah Board</a>
+              <a href="#" className="hover:text-white transition-colors">Halal Stocks</a>
+              <a href="#" className="hover:text-white transition-colors">Research Blog</a>
+              <a href="#" className="hover:text-white transition-colors">Compliance & Disclosures</a>
+              <a href="#" className="hover:text-white transition-colors">Join Us</a>
+            </div>
+          </div>
+
+          <hr className="border-white/10 my-6" />
+
+          {/* ==================== REGULATORY DISCLAIMERS ==================== */}
+          <div className="text-[11px] text-slate-300/90 leading-relaxed space-y-2">
             <p>
               <span className="font-bold italic text-white">Disclaimer:</span> “Registration granted by SEBI and certification from NISM in no way guarantee performance of the intermediary or provide any assurance of returns to investors.”
             </p>
@@ -154,38 +153,57 @@ export default function Footer() {
               <span className="font-bold italic text-white">Standard warning:</span> “Investment in securities market are subject to market risks. Read all the related documents carefully before investing.”
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* ==================== LOWER SECTION: WHITE/LIGHT BAR COMPLAINTS & INTERNAL LINKS BAR ==================== */}
-      <div className="bg-white text-slate-600 text-[12px] py-6 px-5 border-t border-slate-200 font-medium">
+      {/* ==================== LOWER SECTION: WHITE COMPLAINTS LINKS BAR ==================== */}
+      <div className="bg-white text-slate-500 text-[11px] py-5 px-5 border-t border-slate-200">
         <div className="max-w-7xl mx-auto text-center leading-loose">
-          <div className="block md:inline">
-            © All Rights Reserved |{' '}
-            <a href="https://zamzam-capital.com/wp-content/uploads/2025/07/Complaints-Board-0625.pdf" className="hover:text-emerald-600 transition-colors underline mx-1">Complaints Board</a> |{' '}
-            <a href="https://zamzam-capital.com/terms-and-conditions/" className="hover:text-emerald-600 transition-colors underline mx-1">Terms & Conditions</a> |{' '}
-            <a href="https://zamzam-capital.com/wp-content/uploads/2024/08/Grievance-Redressal.pdf#" className="hover:text-emerald-600 transition-colors underline mx-1">Grievance Redressal Process</a> |{' '}
-            <a href="https://zamzam-capital.com/wp-content/uploads/2024/08/Individual-Code-of-Conduct.pdf" className="hover:text-emerald-600 transition-colors underline mx-1">Individual Code of Conduct</a> |{' '}
-            <a href="https://zamzam-capital.com/wp-content/uploads/2024/08/Disclosure-advice.pdf" className="hover:text-emerald-600 transition-colors underline mx-1">Disclosure Advice</a>
+          <div className="flex flex-wrap justify-center gap-x-1 gap-y-0.5">
+            <span>© All Rights Reserved</span> | 
+            <a href="#" className="hover:text-emerald-700 underline">Complaints Board</a> | 
+            <a href="#" className="hover:text-emerald-700 underline">Terms & Conditions</a> | 
+            <a href="#" className="hover:text-emerald-700 underline">Grievance Redressal Mechanism</a> | 
+            <a href="#" className="hover:text-emerald-700 underline">Code of Conduct</a> | 
+            <a href="#" className="hover:text-emerald-700 underline">Disclosure Advice</a>
           </div>
-          <div className="mt-2 block md:mt-1">
-            <a href="https://zamzam-capital.com/wp-content/uploads/2024/08/AML-Policy.pdf" className="hover:text-emerald-600 transition-colors underline mx-1">Privacy Policy</a> |{' '}
-            <a href="https://zamzam-capital.com/wp-content/uploads/2024/08/Internal-Policy.pdf" className="hover:text-emerald-600 transition-colors underline mx-1">Internal Policy</a> |{' '}
-            <a href="https://zamzam-capital.com/wp-content/uploads/2024/08/AML-Policy.pdf" className="hover:text-emerald-600 transition-colors underline mx-1">AML Policy</a> |{' '}
-            <a href="#" className="hover:text-emerald-600 transition-colors underline mx-1">Refund Policy</a> |Trace{' '}
-            <a href="https://zamzam-capital.com/disclosure-under-regulation-19/" className="hover:text-emerald-600 transition-colors underline mx-1">Disclosure</a> |{' '}
-            <a href="https://zamzam-capital.com/disclaimer/" className="hover:text-emerald-600 transition-colors underline mx-1">Disclaimer</a> |{' '}
-            <a href="https://zamzam-capital.com/wp-content/uploads/2024/08/Investor-Charter.pdf" className="hover:text-emerald-600 transition-colors underline mx-1">Investor Charter</a> |{' '}
-            <span className="text-slate-800 font-semibold">Zamzam Capital (#INH000016199)</span>
+          <div className="flex flex-wrap justify-center gap-x-1 gap-y-0.5 mt-1">
+            <a href="#" className="hover:text-emerald-700 underline">Privacy Policy</a> | 
+            <a href="#" className="hover:text-emerald-700 underline">Internal Policy</a> | 
+            <a href="#" className="hover:text-emerald-700 underline">AML Policy</a> | 
+            <a href="#" className="hover:text-emerald-700 underline">Refund Policy</a> | 
+            <a href="#" className="hover:text-emerald-700 underline">Disclosure</a> | 
+            <a href="#" className="hover:text-emerald-700 underline">Disclaimer</a> | 
+            <a href="#" className="hover:text-emerald-700 underline">Investor Charter</a> | 
+            <span className="text-slate-700 font-semibold">Zamzam Capital (#INH000016199)</span>
           </div>
         </div>
       </div>
 
+ {/* ==================== Faraz is here ==================== */}
+     
+<div className="flex justify-center px-4 pt-3 sm:px-6 lg:px-8">
+          <div
+            className="relative inline-flex items-center gap-2 px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-white shadow-lg shadow-black/15"
+            style={{
+              background:
+                "linear-gradient(90deg, rgba(0,143,122,0.95), rgba(6,111,93,0.95))",
+              clipPath: "polygon(0 0, 100% 0, 96% 100%, 4% 100%)",
+            }}
+          >
+            <span className="text-white/85">Developed by</span>
+            <a
+              href="https://aquibyazdani.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-white transition hover:text-white/80"
+            >
+              aquibyazdani.com
+            </a>
+          </div>
+        </div>
       {/* ==================== SCROLL TO TOP BUTTON ==================== */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-[95px] right-5 z-[99999] w-11 h-11 bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-full cursor-pointer flex items-center justify-center shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+          className="fixed bottom-6 right-5 z-[99999] w-11 h-11 bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-full cursor-pointer flex items-center justify-center shadow-lg hover:-translate-y-0.5 transition-all duration-200"
           aria-label="Scroll to top"
           type="button"
         >
