@@ -3,6 +3,7 @@ import { ArrowUp } from 'lucide-react';
 
 export default function Footer() {
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false); // Added state to track logo loading error safely
 
   useEffect(() => {
     const handleScroll = () => {
@@ -154,27 +155,27 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* ==================== ARRAI MEMBER LOGO BRANDING ==================== */}
+          {/* ==================== FIXED: CLEAN ARRAI MEMBER LOGO PIECE ==================== */}
           <div className="mt-8 flex items-center gap-3">
             <span className="text-[12px] italic text-white font-medium">Proud member of</span>
-            <div className="bg-white p-2 rounded max-w-[200px] flex items-center justify-center">
-              <img 
-                src="/path-to-your-arrai-logo.png" 
-                alt="Association of Registered Research Analysts of India" 
-                className="h-9 object-contain"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  if (e.currentTarget.parentNode) {
-                    e.currentTarget.parentNode.innerHTML = '<span class="text-[10px] text-blue-900 font-bold text-center leading-tight">Association of Registered<br/>Research Analysts of India</span>';
-                  }
-                }}
-              />
+            <div className="bg-white p-2 rounded max-w-[200px] flex items-center justify-center min-h-[44px]">
+              {!logoFailed ? (
+                <img 
+                  src="https://arrai.org.in/wp-content/uploads/2021/09/ARRAI_Full-Lockup_2x.png" style="background-color: #ffffff; width: 15%;" 
+                  alt="Association of Registered Research Analysts of India" 
+                  className="h-9 object-contain"
+                  onError={() => setLogoFailed(true)}
+                />
+              ) : (
+                <span className="text-[10px] text-blue-900 font-bold text-center leading-tight">
+                  Association of Registered<br />Research Analysts of India
+                </span>
+              )}
             </div>
           </div>
 
         </div>
-      </div> {/* <-- FIXED: This closes max-w-7xl */}
-    </div> {/* <-- FIXED: This closes the upper green block background div */}
+      </div>
 
       {/* ==================== LOWER SECTION: WHITE COMPLAINTS LINKS BAR ==================== */}
       <div className="bg-white text-slate-500 text-[11px] py-5 px-5 border-t border-slate-200">
