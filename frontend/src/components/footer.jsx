@@ -23,7 +23,7 @@ export default function Footer() {
   return (
     <footer className="relative w-full text-left font-sans text-slate-300">
       
-      {/* Upper Green Background Block - Changed to Solid Green to match the image */}
+      {/* Upper Green Background Block */}
       <div className="relative bg-[#0d4d3a] px-5 py-12 lg:px-8 lg:py-14">
         <div className="relative max-w-7xl mx-auto">
           
@@ -128,7 +128,7 @@ export default function Footer() {
 
           <hr className="border-white/10 my-6" />
 
-          {/* ==================== ADDED: QUICK NAVIGATION SECTION ==================== */}
+          {/* ==================== QUICK NAVIGATION SECTION ==================== */}
           <div className="text-[13px] mb-6">
             <h5 className="text-white font-bold mb-2">Quick Navigation</h5>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-slate-200 font-medium">
@@ -153,6 +153,29 @@ export default function Footer() {
               <span className="font-bold italic text-white">Standard warning:</span> “Investment in securities market are subject to market risks. Read all the related documents carefully before investing.”
             </p>
           </div>
+
+          {/* ==================== ARRAI MEMBER LOGO BRANDING ==================== */}
+          <div className="mt-8 flex items-center gap-3">
+            <span className="text-[12px] italic text-white font-medium">Proud member of</span>
+            <div className="bg-white p-2 rounded max-w-[200px] flex items-center justify-center">
+              <img 
+                src="/path-to-your-arrai-logo.png" 
+                alt="Association of Registered Research Analysts of India" 
+                className="h-9 object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  if (e.currentTarget.parentNode) {
+                    e.currentTarget.parentNode.innerHTML = '<span class="text-[10px] text-blue-900 font-bold text-center leading-tight">Association of Registered<br/>Research Analysts of India</span>';
+                  }
+                }}
+              />
+            </div>
+          </div>
+
+        </div>
+      </div> {/* <-- FIXED: This closes max-w-7xl */}
+    </div> {/* <-- FIXED: This closes the upper green block background div */}
+
       {/* ==================== LOWER SECTION: WHITE COMPLAINTS LINKS BAR ==================== */}
       <div className="bg-white text-slate-500 text-[11px] py-5 px-5 border-t border-slate-200">
         <div className="max-w-7xl mx-auto text-center leading-loose">
@@ -177,28 +200,27 @@ export default function Footer() {
         </div>
       </div>
 
- {/* ==================== Faraz is here ==================== */}
-     
-<div className="flex justify-center px-4 pt-3 sm:px-6 lg:px-8">
-          <div
-            className="relative inline-flex items-center gap-2 px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-white shadow-lg shadow-black/15"
-            style={{
-              background:
-                "linear-gradient(90deg, rgba(0,143,122,0.95), rgba(6,111,93,0.95))",
-              clipPath: "polygon(0 0, 100% 0, 96% 100%, 4% 100%)",
-            }}
+      {/* ==================== DEVELOPER BADGE ==================== */}
+      <div className="flex justify-center bg-white px-4 pt-1 pb-5 sm:px-6 lg:px-8">
+        <div
+          className="relative inline-flex items-center gap-2 px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-white shadow-lg shadow-black/15"
+          style={{
+            background: "linear-gradient(90deg, rgba(0,143,122,0.95), rgba(6,111,93,0.95))",
+            clipPath: "polygon(0 0, 100% 0, 96% 100%, 4% 100%)",
+          }}
+        >
+          <span className="text-white/85">Developed by</span>
+          <a
+            href="https://aquibyazdani.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-bold text-white transition hover:text-white/80"
           >
-            <span className="text-white/85">Developed by</span>
-            <a
-              href="https://aquibyazdani.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-bold text-white transition hover:text-white/80"
-            >
-              aquibyazdani.com
-            </a>
-          </div>
+            aquibyazdani.com
+          </a>
         </div>
+      </div>
+
       {/* ==================== SCROLL TO TOP BUTTON ==================== */}
       {showScrollTop && (
         <button
